@@ -1,0 +1,5 @@
+apiVersion: v2
+appVersion: 1.0.0
+description: UP9 agent deployment for Kubernetes
+name: up9
+version: 0.2.2

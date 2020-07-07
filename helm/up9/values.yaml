@@ -1,0 +1,66 @@
+namespace: up9  # Currently injector works only if it is up9 TODO: TRA-738 (to support namespace other than 'up9')
+serviceAccountName: up9-service-account
+clusterRoleName: up9-cluster-role
+clusterRoleBindingName: up9-cluster-role-binding
+
+defaultModel:
+agentName:
+clientId:
+clientSecret:
+up9EnvSuffix: up9.app
+
+
+agent:
+  enabled: true
+  image:
+    path: gcr.io/up9-docker-hub/trcc-agent/master:latest
+    imagePullPolicy: Always
+  resourcesName: up9-test-agent
+  testRunnerVersion: master:latest
+
+authHelper:
+  enabled: true
+  image:
+    path: gcr.io/up9-docker-hub/authentication-helper/master:latest
+    imagePullPolicy: Always
+  resourcesName: up9-auth-helper
+
+sidecarInjectionEnabled: true
+collector:
+  resourcesName: up9-collector
+  image:
+    path: gcr.io/up9-docker-hub/collector/master:latest
+    imagePullPolicy: Always
+
+sidecarInjector:
+  sidecarInjectorImage:
+    path: gcr.io/up9-docker-hub/sidecar-injector:v1
+    imagePullPolicy: Always
+
+  annotationNamespace: injector.up9
+
+  up9InjectedEnvoyImage:
+    path: gcr.io/up9-docker-hub/up9-envoy/develop:latest
+    imagePullPolicy: Always
+
+  up9InjectedInitImage:
+    path: gcr.io/up9-docker-hub/up9-inject-init/develop:latest
+    imagePullPolicy: Always
+
+  up9InjectedPassiveTapperImage:
+    path: gcr.io/up9-docker-hub/passive-tapper/master:latest
+    imagePullPolicy: Always
+
+passiveTapper:
+  port: 25111
+
+envoy:
+  adminTapPort: 21213
+  proxyListenPortRangeBegin: 21214
+  egressPort: 21212
+  envoyUserId: 1337
+
+logging:
+  disableStdoutLogging: 0
+  disableStderrLogging: 0
+  disableShipToUP9Logging: 0
