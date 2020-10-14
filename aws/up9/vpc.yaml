@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+  Subnet0:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs
+          Ref: 'AWS::Region'
+      CidrBlock: '10.0.0.0/24'
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref 'Vpc'
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Select 
+        - 1
+        - !GetAZs
+          Ref: 'AWS::Region'
+      CidrBlock: '10.0.1.0/24'
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref 'Vpc'
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Select 
+        - 2
+        - !GetAZs
+          Ref: 'AWS::Region'
+      CidrBlock: '10.0.2.0/24'
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref 'Vpc'
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'Vpc'
+  SecondaryRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref 'Vpc'
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'SecondaryRouteTable'
+  SubnetRouteTableAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref 'SecondaryRouteTable'
+      SubnetId: !Ref 'Subnet0'
+  SubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref 'SecondaryRouteTable'
+      SubnetId: !Ref 'Subnet1'
+  SubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref 'SecondaryRouteTable'
+      SubnetId: !Ref 'Subnet2'
