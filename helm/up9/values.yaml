@@ -33,7 +33,7 @@ collector:
 
 sidecarInjector:
   sidecarInjectorImage:
-    path: gcr.io/up9-docker-hub/sidecar-injector:v1
+    path: gcr.io/up9-docker-hub/sidecar-injector:v2.1
     imagePullPolicy: Always
 
   annotationNamespace: injector.up9
