@@ -47,7 +47,6 @@ spec:
           image: {{ .Values.collector.image.path }}
           imagePullPolicy: {{ .Values.collector.image.imagePullPolicy }}
           name: {{ .Values.collector.resourcesName }}-daemonset
-          resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst

@@ -43,7 +43,6 @@ spec:
         image: {{ .Values.agent.image.path }}
         imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
         name: {{ .Values.agent.resourcesName }}
-
       automountServiceAccountToken: true
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}

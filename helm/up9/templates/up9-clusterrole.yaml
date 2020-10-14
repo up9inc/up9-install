@@ -3,31 +3,15 @@ kind: ClusterRole
 metadata:
   name: {{ .Values.clusterRoleName }}
 rules:
-  - apiGroups:
-      - ""
-      - "extensions"
-    resources:
-      - pods
-      - services
-      - endpoints
-      - namespaces
-      - ingresses
-      - configmaps
-    verbs:
-      - list
-      - get
-      - watch
-      - deletecollection
-  - apiGroups:
-      - "batch"
-      - "extensions"
-    resources:
-      - jobs
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - delete
-      - deletecollection
-      - patch
+  - apiGroups: [ "", "extensions", "apps" ]
+    resources: [ "pods", "services", "endpoints", "namespaces",  "ingresses", "configmaps", "deployments" ]
+    verbs: [ "list", "get", "watch" ]
+  - apiGroups: [ "extensions", "batch" ]
+    resources: [ "jobs" ]
+    verbs: [ "get", "list", "watch", "create", "delete", "deletecollection", "patch" ]
+  - apiGroups: [ "", "extensions" ]
+    resources: [ "pods" ]
+    verbs: [ "deletecollection" ]
+  - apiGroups: [ "", "extensions" ]
+    resources: [ "configmaps" ]
+    verbs: [ "patch", "get", "update" ]
