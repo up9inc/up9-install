@@ -203,7 +203,7 @@ metadata:
   labels:
     app: up9-sidecar-injector
 data:
-  config: |
+  up9-injector-config: |
     name: up9-injector-config
 ---
 {{ end }}
