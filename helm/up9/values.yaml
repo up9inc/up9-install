@@ -3,7 +3,6 @@ serviceAccountName: up9-service-account
 clusterRoleName: up9-cluster-role
 clusterRoleBindingName: up9-cluster-role-binding
 
-defaultModel:
 agentName:
 clientId:
 clientSecret:

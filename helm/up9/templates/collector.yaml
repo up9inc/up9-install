@@ -31,8 +31,6 @@ spec:
               value: {{ .Values.clientSecret | quote }}
             - name: AGENT_NAME
               value: {{ .Values.agentName | quote }}
-            - name: DEFAULT_MODEL
-              value: {{ .Values.defaultModel | quote }}
             - name: UP9_DISABLE_LOGS_STDOUT
               value: {{ .Values.logging.disableStdoutLogging | quote }}
             - name: UP9_DISABLE_LOGS_STDERR

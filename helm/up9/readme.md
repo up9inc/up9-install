@@ -20,8 +20,6 @@ Update `values.yaml`
 
 `agentName` - choose a name with which the agent registers itself
 
-`defaultModel` - choose name to which all tapping will go by default (can be changed from up9 side later)
-
 #### Optional
 `sidecarInjectionEnabled` - Whether to enable sidecar injection
 

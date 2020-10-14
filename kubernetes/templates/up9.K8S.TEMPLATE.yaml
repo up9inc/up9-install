@@ -306,7 +306,6 @@ spec:
         image: gcr.io/up9-docker-hub/trcc-agent/master:latest
         imagePullPolicy: Always
         name: up9-test-agent
-
       automountServiceAccountToken: true
       serviceAccount: up9-service-account
       serviceAccountName: up9-service-account

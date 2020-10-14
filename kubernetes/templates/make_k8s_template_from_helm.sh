@@ -80,7 +80,6 @@ echo "AGENT_NAME        = ${AGENT_NAME}"
 echo ""
 
 helm template --repo https://static.up9.com/helm/ up9agent up9 \
-    --set defaultModel=${DEFAULT_MODEL} \
     --set clientId=${CLIENT_ID} \
     --set clientSecret=${CLIENT_SECRET} \
     --set agentName=${AGENT_NAME} > ${OUTPUT_FILE}
