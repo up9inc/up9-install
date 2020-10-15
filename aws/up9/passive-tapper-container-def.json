@@ -1,0 +1,15 @@
+        {
+          "environment": [
+            {
+              "name": "APP_PORTS",
+              "value": ""
+            },
+            {
+              "name": "WEB_SOCKET_PORT",
+              "value": "25111"
+            }
+          ],
+          "memory": 500,
+          "image": "gcr.io/up9-docker-hub/passive-tapper/develop:latest",
+          "name": "passive-tapper"
+        }

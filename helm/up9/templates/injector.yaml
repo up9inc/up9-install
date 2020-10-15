@@ -103,9 +103,8 @@ metadata:
     app: up9-sidecar-injector
 webhooks:
 - name: "www.up9.com"
-  objectSelector:
-    matchExpressions:
-      - {key: injector.up9/request, operator: Exists}
+  objectSelector: {}
+  namespaceSelector: {}
   failurePolicy: "Ignore" # we fail "open" if the webhook is down hard
   timeoutSeconds: 2
   rules:
@@ -195,5 +194,16 @@ data:
           value: {{ .Values.envoy.adminTapPort }}
         - name: ENVOY_USER_ID
           value: {{ .Values.envoy.envoyUserId }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-injector-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-injector-config: |
+    name: up9-injector-config
 ---
 {{ end }}

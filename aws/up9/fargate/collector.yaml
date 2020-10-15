@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  ClusterName:
+    Type: String
+    ConstraintDescription: Please enter the target cluster.
+  ClientId:
+    Type: String
+  ClientSecret:
+    Type: String
+  up9EnvSuffix:
+    Type: String
+  PassiveTapperPort:
+    Type: String
+    Default: 25111
+  AgentName:
+    Type: String
+  CollectorImage:
+    Type: String
+    Default: gcr.io/up9-docker-hub/collector/master:latest
+  Vpc:
+    Type: String
+  Subnet:
+    Type: String
+Resources:
+  CollectorSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Collector security group
+      VpcId: !Ref 'Vpc'
+  CollectorTaskRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: Allow up9 agent to manage batch jobs
+      Policies:
+        - PolicyName: RootPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      NetworkMode: awsvpc
+      TaskRoleArn: !Ref 'CollectorTaskRole'
+      Cpu: 256
+      Memory: 512
+      ContainerDefinitions:
+        - Name: collector
+          Image: !Ref 'CollectorImage'
+          Memory: '500'
+          Environment:
+            - Name: MODE
+              Value: ecs
+            - Name: CLIENT_ID
+              Value: !Ref 'ClientId'
+            - Name: CLIENT_SECRET
+              Value: !Ref 'ClientSecret'
+            - Name: UP9_ENV_SUFFIX
+              Value: !Ref 'up9EnvSuffix'
+            - Name: PASSIVE_TAPPER_PORT
+              Value: !Ref 'PassiveTapperPort'
+            - Name: AGENT_NAME
+              Value: !Ref 'AgentName'
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      LaunchType: FARGATE
+      SchedulingStrategy: REPLICA
+      DesiredCount: 1
+      TaskDefinition: !Ref 'TaskDefinition'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref 'Subnet'
+          SecurityGroups:
+            - !Ref 'CollectorSecurityGroup'

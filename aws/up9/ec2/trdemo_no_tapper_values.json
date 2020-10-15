@@ -1,0 +1,18 @@
+[
+    {
+        "ParameterKey": "ClusterName",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Vpc",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Subnet1",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Subnet2",
+        "ParameterValue":
+    }
+]

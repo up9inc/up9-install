@@ -23,8 +23,6 @@ Prepare `setup.yaml` file with few settings, specific to your installation
 
 ### Optional
 
-`defaultModel` - choose default model name to which all tapping is sent (can be changed via UP9 CLI or UI later)
-
 `logging.disableStdoutLogging` - disable logging to stdout (default: 0, logging enabled)
 `logging.disableStderrLogging` - disable logging to stderr (default: 0, logging enabled))
 
@@ -53,14 +51,12 @@ helm -n default delete up9agent
 ```
 
 ## Example setup.yaml file
-The example below will use `up9xyz` name for installed UP9 agent, send data to workspace named `xyz` and disable logging to stdout
+The example below will use `up9xyz` name for installed UP9 agent and disable logging to stdout
 
 ```
 agentName: up9xyz
 clientId: dGhpcyBpcyBjbGllbnRJZAo=
 clientSecret: dGhpcyBpcyBjbGllbnRTZWNyZXQK
-defaultModel: xyz
 logging:
   disableStdoutLogging: 1
 ```
-
