@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: up9-limit-range
+  namespace: {{ .Values.namespace }}
+spec:
+  limits:
+    - default:
+        memory: "512Mi"
+        cpu: "200m"
+      type: Container

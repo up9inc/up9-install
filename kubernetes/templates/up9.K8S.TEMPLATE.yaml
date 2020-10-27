@@ -1,0 +1,425 @@
+---
+# Source: up9/templates/up9-namespace.yaml
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: up9
+  labels:
+    name: up9
+---
+# Source: up9/templates/up9-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: up9-service-account
+  namespace: up9
+  labels:
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+---
+# Source: up9/templates/injector.yaml
+# TODO: TRA-738 (to support namespace other than 'up9')
+apiVersion: v1
+data:
+  sidecar-injector.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUwRENDQXJpZ0F3SUJBZ0lKQVBkRDJYYmkwSVNsTUEwR0NTcUdTSWIzRFFFQkN3VUFNSUdGTVFzd0NRWUQKVlFRR0V3SlZVekVSTUE4R0ExVUVDQXdJVG1WM0lGbHZjbXN4RmpBVUJnTlZCQWNNRFU1bGR5QlpiM0pySUVOcApkSGt4RERBS0JnTlZCQW9NQTNWd09URWdNQjRHQTFVRUF3d1hkWEE1TFhOcFpHVmpZWEl0YVc1cVpXTjBiM0l0ClEwRXhHekFaQmdrcWhraUc5dzBCQ1FFV0RHNTFiR3hBZFhBNUxtTnZiVEFnRncweU1EQXhNekV4TkRFMk1UbGEKR0E4ME56VTNNVEl5TnpFME1UWXhPVm93V3pFTE1Ba0dBMVVFQmhNQ1ZWTXhFVEFQQmdOVkJBZ01DRTVsZHlCWgpiM0pyTVF3d0NnWURWUVFIREFOT1dVTXhEREFLQmdOVkJBb01BM1Z3T1RFZE1Cc0dBMVVFQXd3VWRYQTVMWE5wClpHVmpZWEl0YVc1cVpXTjBiM0l3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRREcKdE1VSEI3c09senczTC8waGN4NEtpK0RTQUVGRVEzdTJjcTdPdUtjVG5wQ0JQc1BTdE8rcEpFUXlYNHc0UzJBQgpDY1lhRkcxMzZXYVpmbDNhKzdjaTcrMUQ2R3NWV1lKNm43eVM4U0orVUpTa2Q2cEVaM2tCNUlRdFRoSFh0QnFjCnNRSlVJTFFSUTNveCt4STVpUmJjNzRZOWRySk5TTzYrdkVFNmhoaTRlOTVhWXY0aDhWcC92K1RaSHpBRllPRWUKeVBRLzRhQzQxamRlSGFaa1F6UzdwLzF3LzJBSVhFSDZ5djF2V3VSVVVFL3A3NEIwaTNxMHAvdG1hV1R3M2FNdwowL25RR1d5STBsS2hGU0QvRlRZMHRkWmlQT25Sdk1wMDhIdEt4Z3AycFVndno2eFFkWTNOL1RENkpKREpXVzFHCjlVblRCL3k5NllnV0o0V21hRTJmQWdNQkFBR2phakJvTUdZR0ExVWRFUVJmTUYyQ0dYVndPUzF6YVdSbFkyRnkKTFdsdWFtVmpkRzl5TFhCeWIyU0NIWFZ3T1MxemFXUmxZMkZ5TFdsdWFtVmpkRzl5TFhCeWIyUXVkWEE1Z2lGMQpjRGt0YzJsa1pXTmhjaTFwYm1wbFkzUnZjaTF3Y205a0xuVndPUzV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFECmdnSUJBRldYR2VMYkFvbWtIZ2x6TGloZ1Y4TnhtVUQyQ29OR3lpdXNHbFRhU2hXSDBWQ2xJNktUbjE4OEVtN0EKRU1PRHAxcEIzQ3hNODF2TWVJVlN5d0RWTnIrL1RDZmhhc1dYcDBva3dEYjZiZkE5UWhnYjNPcTdLQkovUUhVaApoYTVZWklQMkhMdnl0Mlk2ZGoxS254YzlNS3pnUUZrTGtVRUdvVk9CUkhiQjQzV3hsckJYSEdwL1JKaGxDNkhkCktKUldabmVOamZlQ1RXa2lWUE1YNkxvVkp3OUVzTjNLZGtHSVB4UmZqZzhmb0daNjR5aXZLaHk2Z2cyMmhvRGsKb0w2a1hQUWg5THpOeXIreDE4Uk5FZ2ZBWmZ4d0FtQ0ZNM3dqNlZBSFRGdis4Ukd5M1lTd2hSOGRiMC9JNE5xVQowaUR0TmkrYWxyeHZYQnVBSVUvQnVJM3VEdkltSE03ODVEaU1HbXRMVWMycm9ycHc4QXNRTTdmYng1ZS9lMkczCi82d0N4bzVQODQ0Ulk1Z3d4dmtydkkzQ1FqS0hQeHZINWNVYlhvQnlTTWh3V0hVSTgzTDJnbkRUNWdjTXNuMGkKWVhmZU1BcC90NzZlNlMxZDJTSEpXRmt4dVFJaHh2NGwrL1d1enFIaEVZTFY2LzJoaE1xV282OGJSd0ZaUXJ1UwpISEZrb0FKMEpJa3FmaG1RNHBsMjJGRU1nOTVERS85N2tiVm9DNS8vdjRQZTEyNFprbGdsbTd5Q0JTSDRkNGcvCng0bVd2Yjc1Vjc3dTZLVkRLb3NjK0s1K2hsUkNUQjJHUE9vYVM3b2hNL2NYRjNlQ056NG1WMlNmQ1FYeXJnbnkKYk14QkwwU1ZmaDlOcmdBV2NLQkpWUnVIdkVFSzZFMGYwUEFYR2o5RVFyQys0TTIvCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  sidecar-injector.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBeHJURkJ3ZTdEcGM4TnkvOUlYTWVDb3ZnMGdCQlJFTjd0bkt1enJpbkU1NlFnVDdECjByVHZxU1JFTWwrTU9FdGdBUW5HR2hSdGQrbG1tWDVkMnZ1M0l1L3RRK2hyRlZtQ2VwKzhrdkVpZmxDVXBIZXEKUkdkNUFlU0VMVTRSMTdRYW5MRUNWQ0MwRVVONk1mc1NPWWtXM08rR1BYYXlUVWp1dnJ4Qk9vWVl1SHZlV21MKwpJZkZhZjcvazJSOHdCV0RoSHNqMFArR2d1TlkzWGgybVpFTTB1NmY5Y1A5Z0NGeEIrc3I5YjFya1ZGQlA2ZStBCmRJdDZ0S2Y3Wm1sazhOMmpNTlA1MEJsc2lOSlNvUlVnL3hVMk5MWFdZanpwMGJ6S2RQQjdTc1lLZHFWSUw4K3MKVUhXTnpmMHcraVNReVZsdFJ2Vkowd2Y4dmVtSUZpZUZwbWhObndJREFRQUJBb0lCQUdrL3JMREpsbm5tL3owWQpEUkxmbjhUa1RFUFBZTUtnbi9HR2t6THB1WTE1eW42NjJReE5URGdoL29GVC9MaUFyQ3hBbWc2TVRXTmJYRDNuCkloMXdnSk5mMUNQSkFwYy9YdzVHZDZLNVdKVGhaNm9wdkNVWlRZNEVGVUxOL0VOdG9UN252eDBDYVg1UGFIVDYKMEs5cS9wSXR5TVBia0J2QmlydTZpUzVQZ3Q2THhuM0Q5VG5jRTFLaGMrMHBFZkhNT01FdHFnTXNlWnpMc3A0cwpseUk5Z05LdjdhSWVzeVdjcVBlWGhYQVVVV09rNUMyejRNcXFnL3Q2TVcraE1ldUU5WTdYbEhDRlZ5V1g0aldoCkIzbFltZjFBUUlyd0dWYnpvb2VmcG5JbGxZMEVITHZRTERmTmxvK0Z1SzgyRkptYk02RGUrY0NiS3hVTGtkVUcKMUtkWHZMa0NnWUVBN1kwYzd0Q0pzbnluSGZkNlBkYURJM1B2U1BxNUhuZGloWFBVMnVJYXAzYlErK2dRcHJsdgpnVE5xZ2lvUjdSZ1k4TTBkdWNjaUlZbmU0Z2lvRGZOTlhSME5yR1E3TlBBb2IxRnpPVm1YM2JCaXFIUVBDWXNIClV0WnBTRGFmMWczdmJKdnZUVSt5cXU0NHh6Q2duQlg1MElEUm5rSit3UTlPVDRud0J0b0M2dTBDZ1lFQTFpTmIKSFdYU3liOFV2d1B4d055VnN6NXdMN3E1R1pPTG8wVVVzb2dJQ1RyVml4NDNvUFpBakZQaWNsbWlQNTVtMmY1cApzeWptUzBmUHNWaTRreFVHQ0lkcXpUMXNaY2p5S1hwbG02czl5NFVjdTZ2K1RvejBJSVY5VHpqbm9kTHFzVDFkCkpQaWU5KzJmVVJGR0NlMXpnQm15d2cybVFVNnpQY3ROamptaXJUc0NnWUVBNmdjc3F1WU4waWJXS1VLblRvYW4KK1dSOUorUENQbzZWSkM2Q1ZBV1BCczZhZ3FJVXpYeEFxd094ZVh6aTNqYndVME53ZHBjRlBBOXM0amh2QUJkagpiMGx4TUJZcThqTnJVb2Ztd1doUG9scmtSMXJYZWFwYlU3UGlVdjlscG1kaUtoalJ2OU8xaklwV3EzNXZySFpGCi83RDVValhtVkdLMDNzMWhDQTc5OHQwQ2dZRUF2SHFhTkNIdmlvdVpZeGZCcmhONTRDN1E1L0hlQWxrUHkwRisKbWpXSmZUWS94eGR0dDB1SVBQdUlrVVc3dld0YTgvMHVZL2RYM0dMMHVCQnpSV0ozMFFJQVMyNEkvdjREeCtabgprTUVFdnlJR3pGanltWWtQUjZDM1R3ZXpPWWcvOG9ra2R1b3VZZUxSRzdXc2hBaHdaUXc1ZnZ3c25jYjdsU1JnCnV4S1gwUWtDZ1lFQW56WG9mZk50dENzWWhlOXpWdk5iVjJPRkVmb0o3enBZaStWZGxDck10eklGOUcva2YxTS8KQjQ1MDIzQnlva3BJWVBZRFRrYk5pR21ESThxcHF3amh0bGxGRnpnNjhiYVJPRURuM3g3SytuNDBHbUY4Mkp2VQpPcVNhd1g1M0pDb3VBZFlwWkFwRzU5SWRSRW1veTg3RzZBbmwwazRNS0pSYnd5TEhudUlOU2dzPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+kind: Secret
+metadata:
+  name: up9-sidecar-injector
+  namespace: up9
+type: Opaque
+---
+# Source: up9/templates/injector.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-sidecar-passive
+  namespace: up9
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-sidecar-passive: |
+    name: up9-sidecar-passive
+    labels:
+      up9-tapper: passive
+    containers:
+      - name: sidecar-up9-passive
+        image: gcr.io/up9-docker-hub/passive-tapper/master:latest
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+          privileged: true
+          runAsUser: 0
+        env:
+          - name: WEB_SOCKET_PORT
+            value: 25111
+---
+# Source: up9/templates/injector.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-sidecar-envoy
+  namespace: up9
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-sidecar-envoy: |
+    name: up9-sidecar-envoy
+    labels:
+      up9-tapper: envoy
+    containers:
+    - name: sidecar-up9-envoy
+      image: gcr.io/up9-docker-hub/up9-envoy/develop:latest
+      imagePullPolicy: Always
+      securityContext:
+        runAsUser: 1337
+        allowPrivilegeEscalation: true
+      env:
+      - name: ENVOY_ADMIN_PORT
+        value: 21213
+      - name: ENVOY_RANGE_BEGIN_PORT
+        value: 21214
+      - name: ENVOY_EGRESS_PORT
+        value: 21212
+    initContainers:
+    - name: up9-init
+      image: gcr.io/up9-docker-hub/up9-inject-init/develop:latest
+      imagePullPolicy: Always
+      securityContext:
+        capabilities:
+          add:
+          - NET_ADMIN
+        privileged: true
+      env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: ENVOY_RANGE_BEGIN_PORT
+          value: 21214
+        - name: ENVOY_EGRESS_PORT
+          value: 21212
+        - name: ENVOY_ADMIN_PORT
+          value: 21213
+        - name: ENVOY_USER_ID
+          value: 1337
+---
+# Source: up9/templates/up9-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: up9-cluster-role
+rules:
+  - apiGroups:
+      - ""
+      - "extensions"
+    resources:
+      - pods
+      - services
+      - endpoints
+      - namespaces
+      - ingresses
+      - configmaps
+    verbs:
+      - list
+      - get
+      - watch
+      - deletecollection
+  - apiGroups:
+      - "batch"
+      - "extensions"
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - deletecollection
+      - patch
+---
+# Source: up9/templates/up9-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: up9-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: up9-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: up9-service-account
+    namespace: up9
+---
+# Source: up9/templates/auth-helper.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: up9-auth-helper
+  namespace: up9
+  labels:
+    app: up9-auth-helper
+spec:
+  type: ClusterIP
+  ports:
+    - name: app
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: up9-auth-helper
+---
+# Source: up9/templates/injector.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: up9-sidecar-injector-prod
+  namespace: up9
+  labels:
+    app: up9-sidecar-injector
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 443
+    targetPort: https
+    protocol: TCP
+  - name: http-metrics
+    port: 80
+    targetPort: http-metrics
+    protocol: TCP
+  selector:
+    app: up9-sidecar-injector
+---
+# Source: up9/templates/collector.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: up9-collector-daemonset
+  name: up9-collector-daemonset
+  namespace: up9
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: up9-collector-daemonset
+  template:
+    metadata:
+      labels:
+        app: up9-collector-daemonset
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: UP9_ENV_SUFFIX
+              value: "up9.app"
+            - name: PASSIVE_TAPPER_PORT
+              value: "25111"
+            - name: ENVOY_ADMIN_PORT
+              value: "21213"
+            - name: CLIENT_ID
+              value: "__TMPL_CLIENT_ID__"
+            - name: CLIENT_SECRET
+              value: "__TMPL_CLIENT_SECRET__"
+            - name: AGENT_NAME
+              value: "__TMPL_AGENT_NAME__"
+            - name: DEFAULT_MODEL
+              value: "default"
+            - name: UP9_DISABLE_LOGS_STDOUT
+              value: "0"
+            - name: UP9_DISABLE_LOGS_STDERR
+              value: "0"
+            - name: UP9_DISABLE_LOGS_CLOUD
+              value: "0"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          image: gcr.io/up9-docker-hub/collector/master:latest
+          imagePullPolicy: Always
+          name: up9-collector-daemonset
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: up9-service-account
+      serviceAccountName: up9-service-account
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+---
+# Source: up9/templates/agent.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: up9-test-agent
+  name: up9-test-agent
+  namespace: up9
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: up9-test-agent
+  template:
+    metadata:
+      labels:
+        app: up9-test-agent
+      namespace: up9
+    spec:
+      containers:
+      - env:
+        - name: UP9_ENV_SUFFIX
+          value: up9.app
+        - name: AGENT_NAME
+          value: __TMPL_AGENT_NAME__
+        - name: CLIENT_ID
+          value: __TMPL_CLIENT_ID__
+        - name: CLIENT_SECRET
+          value: __TMPL_CLIENT_SECRET__
+        - name: AUTH_HELPER_SERVER
+          value: up9-auth-helper
+        - name: TEST_RUNNER_VERSION
+          value: master:latest
+        - name: K8S_NAMESPACE
+          value: up9
+        - name: UP9_DISABLE_LOGS_STDOUT
+          value: "0"
+        - name: UP9_DISABLE_LOGS_STDERR
+          value: "0"
+        - name: UP9_DISABLE_LOGS_CLOUD
+          value: "0"
+        image: gcr.io/up9-docker-hub/trcc-agent/master:latest
+        imagePullPolicy: Always
+        name: up9-test-agent
+      automountServiceAccountToken: true
+      serviceAccount: up9-service-account
+      serviceAccountName: up9-service-account
+---
+# Source: up9/templates/auth-helper.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: up9-auth-helper
+  name: up9-auth-helper
+  namespace: up9
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: up9-auth-helper
+  template:
+    metadata:
+      labels:
+        app: up9-auth-helper
+      namespace: up9
+    spec:
+      containers:
+      - image: gcr.io/up9-docker-hub/authentication-helper/master:latest
+        imagePullPolicy: Always
+        name: up9-auth-helper
+        env:
+          - name: "UP9_DISABLE_LOGS_STDOUT"
+            value: "0"
+---
+# Source: up9/templates/injector.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "up9-sidecar-injector"
+  namespace: up9
+  labels:
+    app: "up9-sidecar-injector"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "up9-sidecar-injector"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: "up9-sidecar-injector"
+    spec:
+      serviceAccountName: up9-service-account
+      volumes:
+      - name: secrets
+        secret:
+          secretName: up9-sidecar-injector
+      containers:
+      - name: "up9-sidecar-injector"
+        imagePullPolicy: Always
+        image: gcr.io/up9-docker-hub/sidecar-injector:v1
+        command: ["entrypoint.sh"]
+        args: []
+        ports:
+        - name: https
+          containerPort: 9443
+        - name: http-metrics
+          containerPort: 9000
+        volumeMounts:
+        - name: secrets
+          mountPath: /var/lib/secrets
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /health
+            port: https
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+        env:
+        - name: "TLS_CERT_FILE"
+          value: "/var/lib/secrets/sidecar-injector.crt"
+        - name: "TLS_KEY_FILE"
+          value: "/var/lib/secrets/sidecar-injector.key"
+        - name: "LOG_LEVEL"
+          value: "2"
+        - name: "CONFIG_DIR"
+          value: "conf/"
+        - name: "CONFIGMAP_LABELS"
+          value: "app=up9-sidecar-injector"
+        - name: "ANNOTATION_NAMESPACE"
+          value: injector.up9
+---
+# Source: up9/templates/injector.yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: "up9-sidecar-injector-webhook"
+  labels:
+    app: up9-sidecar-injector
+webhooks:
+- name: "www.up9.com"
+  failurePolicy: "Ignore" # we fail "open" if the webhook is down hard
+  rules:
+  - operations: [ "CREATE" ]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  clientConfig:
+    service:
+      name: "up9-sidecar-injector-prod"
+      namespace: up9
+      path: "/mutate"   # what /url/slug to send requests at
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUwRENDQXJpZ0F3SUJBZ0lKQVBkRDJYYmkwSVNsTUEwR0NTcUdTSWIzRFFFQkN3VUFNSUdGTVFzd0NRWUQKVlFRR0V3SlZVekVSTUE4R0ExVUVDQXdJVG1WM0lGbHZjbXN4RmpBVUJnTlZCQWNNRFU1bGR5QlpiM0pySUVOcApkSGt4RERBS0JnTlZCQW9NQTNWd09URWdNQjRHQTFVRUF3d1hkWEE1TFhOcFpHVmpZWEl0YVc1cVpXTjBiM0l0ClEwRXhHekFaQmdrcWhraUc5dzBCQ1FFV0RHNTFiR3hBZFhBNUxtTnZiVEFnRncweU1EQXhNekV4TkRFMk1UbGEKR0E4ME56VTNNVEl5TnpFME1UWXhPVm93V3pFTE1Ba0dBMVVFQmhNQ1ZWTXhFVEFQQmdOVkJBZ01DRTVsZHlCWgpiM0pyTVF3d0NnWURWUVFIREFOT1dVTXhEREFLQmdOVkJBb01BM1Z3T1RFZE1Cc0dBMVVFQXd3VWRYQTVMWE5wClpHVmpZWEl0YVc1cVpXTjBiM0l3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRREcKdE1VSEI3c09senczTC8waGN4NEtpK0RTQUVGRVEzdTJjcTdPdUtjVG5wQ0JQc1BTdE8rcEpFUXlYNHc0UzJBQgpDY1lhRkcxMzZXYVpmbDNhKzdjaTcrMUQ2R3NWV1lKNm43eVM4U0orVUpTa2Q2cEVaM2tCNUlRdFRoSFh0QnFjCnNRSlVJTFFSUTNveCt4STVpUmJjNzRZOWRySk5TTzYrdkVFNmhoaTRlOTVhWXY0aDhWcC92K1RaSHpBRllPRWUKeVBRLzRhQzQxamRlSGFaa1F6UzdwLzF3LzJBSVhFSDZ5djF2V3VSVVVFL3A3NEIwaTNxMHAvdG1hV1R3M2FNdwowL25RR1d5STBsS2hGU0QvRlRZMHRkWmlQT25Sdk1wMDhIdEt4Z3AycFVndno2eFFkWTNOL1RENkpKREpXVzFHCjlVblRCL3k5NllnV0o0V21hRTJmQWdNQkFBR2phakJvTUdZR0ExVWRFUVJmTUYyQ0dYVndPUzF6YVdSbFkyRnkKTFdsdWFtVmpkRzl5TFhCeWIyU0NIWFZ3T1MxemFXUmxZMkZ5TFdsdWFtVmpkRzl5TFhCeWIyUXVkWEE1Z2lGMQpjRGt0YzJsa1pXTmhjaTFwYm1wbFkzUnZjaTF3Y205a0xuVndPUzV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFECmdnSUJBRldYR2VMYkFvbWtIZ2x6TGloZ1Y4TnhtVUQyQ29OR3lpdXNHbFRhU2hXSDBWQ2xJNktUbjE4OEVtN0EKRU1PRHAxcEIzQ3hNODF2TWVJVlN5d0RWTnIrL1RDZmhhc1dYcDBva3dEYjZiZkE5UWhnYjNPcTdLQkovUUhVaApoYTVZWklQMkhMdnl0Mlk2ZGoxS254YzlNS3pnUUZrTGtVRUdvVk9CUkhiQjQzV3hsckJYSEdwL1JKaGxDNkhkCktKUldabmVOamZlQ1RXa2lWUE1YNkxvVkp3OUVzTjNLZGtHSVB4UmZqZzhmb0daNjR5aXZLaHk2Z2cyMmhvRGsKb0w2a1hQUWg5THpOeXIreDE4Uk5FZ2ZBWmZ4d0FtQ0ZNM3dqNlZBSFRGdis4Ukd5M1lTd2hSOGRiMC9JNE5xVQowaUR0TmkrYWxyeHZYQnVBSVUvQnVJM3VEdkltSE03ODVEaU1HbXRMVWMycm9ycHc4QXNRTTdmYng1ZS9lMkczCi82d0N4bzVQODQ0Ulk1Z3d4dmtydkkzQ1FqS0hQeHZINWNVYlhvQnlTTWh3V0hVSTgzTDJnbkRUNWdjTXNuMGkKWVhmZU1BcC90NzZlNlMxZDJTSEpXRmt4dVFJaHh2NGwrL1d1enFIaEVZTFY2LzJoaE1xV282OGJSd0ZaUXJ1UwpISEZrb0FKMEpJa3FmaG1RNHBsMjJGRU1nOTVERS85N2tiVm9DNS8vdjRQZTEyNFprbGdsbTd5Q0JTSDRkNGcvCng0bVd2Yjc1Vjc3dTZLVkRLb3NjK0s1K2hsUkNUQjJHUE9vYVM3b2hNL2NYRjNlQ056NG1WMlNmQ1FYeXJnbnkKYk14QkwwU1ZmaDlOcmdBV2NLQkpWUnVIdkVFSzZFMGYwUEFYR2o5RVFyQys0TTIvCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K

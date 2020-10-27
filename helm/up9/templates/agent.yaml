@@ -1,0 +1,49 @@
+{{ if .Values.agent.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.agent.resourcesName }}
+  name: {{ .Values.agent.resourcesName }}
+  namespace: {{ .Values.namespace  }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.agent.resourcesName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.agent.resourcesName }}
+      namespace: {{ .Values.namespace }}
+    spec:
+      containers:
+      - env:
+        - name: UP9_ENV_SUFFIX
+          value: {{ .Values.up9EnvSuffix }}
+        - name: AGENT_NAME
+          value: {{ required ".Values.agentName parameter is Required" .Values.agentName }}
+        - name: CLIENT_ID
+          value: {{ required ".Values.clientId parameter is Required" .Values.clientId }}
+        - name: CLIENT_SECRET
+          value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
+        - name: AUTH_HELPER_SERVER
+          value: {{ .Values.authHelper.resourcesName }}
+        - name: TEST_RUNNER_VERSION
+          value: {{ .Values.agent.testRunnerVersion }}
+        - name: K8S_NAMESPACE
+          value: {{ .Values.namespace }}
+        - name: UP9_DISABLE_LOGS_STDOUT
+          value: {{ .Values.logging.disableStdoutLogging | quote }}
+        - name: UP9_DISABLE_LOGS_STDERR
+          value: {{ .Values.logging.disableStderrLogging | quote }}
+        - name: UP9_DISABLE_LOGS_CLOUD
+          value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+        image: {{ .Values.agent.image.path }}
+        imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
+        name: {{ .Values.agent.resourcesName }}
+      automountServiceAccountToken: true
+      serviceAccount: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+{{ end }}

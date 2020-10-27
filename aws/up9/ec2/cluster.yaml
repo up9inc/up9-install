@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  KeyPairName:
+    Type: String
+  Vpc:
+    Type: String
+  Subnet:
+    Type: String
+Mappings:
+  RegionMap:
+    us-east-2:
+      ImageId: ami-044bf85e844eddde5
+    us-east-1:
+      ImageId: ami-00f69adbdc780866c
+    us-west-1:
+      ImageId: ami-014ee82610857fa9a
+    us-west-2:
+      ImageId: ami-088dbc54f17f8a1a2
+    ap-south-1:
+      ImageId: ami-0a03968949ee4e012
+    ap-northeast-2:
+      ImageId: ami-0750fd52026129ec6
+    ap-southeast-1:
+      ImageId: ami-0689726e1a700ed66
+    ap-southeast-2:
+      ImageId: ami-0e6b68880cc94cf09
+    ap-northeast-1:
+      ImageId: ami-00e177b8d879d5d3f
+    ca-central-1:
+      ImageId: ami-00f6d6e2711b7adbe
+    eu-central-1:
+      ImageId: ami-0fe4cfe8d04ec091e
+    eu-west-1:
+      ImageId: ami-09cec0d91e6d220ea
+    eu-west-2:
+      ImageId: ami-03ec263c71e44528d
+    eu-west-3:
+      ImageId: ami-0b700aef0f223def9
+    eu-north-1:
+      ImageId: ami-0639f978e5b88a840
+    sa-east-1:
+      ImageId: ami-05b1add1a0c31be07
+    # ap-east-1
+    # ap-northeast-3
+    # me-south-1
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow load balancer to accept HTTP
+      SecurityGroupIngress: 
+        - CidrIp: '0.0.0.0/0'
+          Description: HTTP
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: '0.0.0.0/0'
+          Description: HTTP
+          FromPort: 873
+          IpProtocol: tcp
+          ToPort: 873
+        - CidrIpv6: '::/0'
+          Description: HTTP
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIpv6: '::/0'
+          Description: HTTP
+          FromPort: 873
+          IpProtocol: tcp
+          ToPort: 873
+      VpcId: !Ref 'Vpc'
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
+              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
+              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents']
+            Resource: '*'
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [!Ref 'EC2Role']
+  ECSInstance1:
+    Type: AWS::EC2::Instance
+    Properties: 
+      EbsOptimized: true
+      IamInstanceProfile: !Ref 'EC2InstanceProfile'
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - 'ImageId'
+      InstanceType: m5a.large
+      KeyName: !Ref 'KeyPairName'
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref 'InstanceSecurityGroup'
+      SubnetId: !Ref 'Subnet'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+  ECSInstance2:
+    Type: AWS::EC2::Instance
+    Properties: 
+      EbsOptimized: true
+      IamInstanceProfile: !Ref 'EC2InstanceProfile'
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - 'ImageId'
+      InstanceType: m5a.large
+      KeyName: !Ref 'KeyPairName'
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref 'InstanceSecurityGroup'
+      SubnetId: !Ref 'Subnet'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+  ECSInstance3:
+    Type: AWS::EC2::Instance
+    Properties: 
+      EbsOptimized: true
+      IamInstanceProfile: !Ref 'EC2InstanceProfile'
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - 'ImageId'
+      InstanceType: m5a.large
+      KeyName: !Ref 'KeyPairName'
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref 'InstanceSecurityGroup'
+      SubnetId: !Ref 'Subnet'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config

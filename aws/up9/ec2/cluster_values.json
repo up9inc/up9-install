@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Vpc",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Subnet",
+        "ParameterValue":
+    }
+]

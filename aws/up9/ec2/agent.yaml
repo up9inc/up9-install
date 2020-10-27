@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  ClusterName:
+    Type: String
+    ConstraintDescription: Please enter the target cluster.
+  ClientId:
+    Type: String
+  ClientSecret:
+    Type: String
+  up9EnvSuffix:
+    Type: String
+  AgentName:
+    Type: String
+  TestRunnerVersion:
+    Type: String
+  InstanceRole:
+    Type: String
+  Vpc:
+    Type: String
+  Subnet:
+    Type: String
+  Up9DnsNamespaceName:
+    Type: String
+    Default: up9
+  TestRunnerImage:
+    Type: String
+  TrccAgentImage:
+    Type: String
+  AuthHelperImage:
+    Type: String
+  AuthHelperPort:
+    Type: Number
+    Default: 3000
+Resources:
+  ComputeEnvironmentInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow load balancer to accept HTTP
+      SecurityGroupIngress: 
+        - CidrIp: '0.0.0.0/0'
+          Description: HTTP
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: '0.0.0.0/0'
+          Description: HTTP
+          FromPort: 873
+          IpProtocol: tcp
+          ToPort: 873
+        - CidrIpv6: '::/0'
+          Description: HTTP
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIpv6: '::/0'
+          Description: HTTP
+          FromPort: 873
+          IpProtocol: tcp
+          ToPort: 873
+      VpcId: !Ref 'Vpc'
+  ComputeEnvironmentServiceRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - batch.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: Allow up9 job queue to run jobs
+      Policies:
+        - PolicyName: RootPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties: 
+      ComputeResources: 
+        InstanceRole: !Ref 'InstanceRole'
+        InstanceTypes: 
+          - optimal
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - !Ref 'ComputeEnvironmentInstanceSecurityGroup'
+        Subnets:
+          - !Ref 'Subnet'
+        Type: EC2
+      ServiceRole: !Ref 'ComputeEnvironmentServiceRole'
+      Type: MANAGED
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties: 
+      ComputeEnvironmentOrder: 
+        - ComputeEnvironment: !Ref 'ComputeEnvironment'
+          Order: 1
+      Priority: 1
+  TestRunnerJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties: 
+      ContainerProperties: 
+        Image: !Join
+          - ':'
+          - - !Ref 'TestRunnerImage'
+            - !Ref 'TestRunnerVersion'
+        Vcpus: 1
+        Memory: 500
+      RetryStrategy:
+        Attempts: 1
+      Timeout:
+         AttemptDurationSeconds: 100
+      Type: container
+  AgentTaskRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: Allow up9 agent to manage batch jobs
+      Policies:
+        - PolicyName: RootPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  AgentTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: bridge
+      TaskRoleArn: !Ref 'AgentTaskRole'
+      ContainerDefinitions: 
+        - Name: up9-agent
+          Image: !Ref 'TrccAgentImage'
+          Memory: '500'
+          Environment:
+            - Name: UP9_ENV_SUFFIX
+              Value: !Ref 'up9EnvSuffix'
+            - Name: AGENT_NAME
+              Value: !Ref 'AgentName'
+            - Name: CLIENT_ID
+              Value: !Ref 'ClientId'
+            - Name: CLIENT_SECRET
+              Value: !Ref 'ClientSecret'
+            - Name: AUTH_HELPER_SERVER
+              Value: !Join
+                - '.'
+                - - !GetAtt
+                    - AuthHelperServiceDiscovery
+                    - Name
+                  - !Ref 'Up9DnsNamespaceName'
+            - Name: CONTAINER_ORCHESTRATION_SYSTEM
+              Value: ecs
+            - Name: JOB_QUEUE_ARN
+              Value: !Ref 'JobQueue'
+            - Name: JOB_DEFINITION_ARN
+              Value: !Ref 'TestRunnerJobDefinition'
+  AgentService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      LaunchType: EC2
+      SchedulingStrategy: REPLICA
+      DesiredCount: 1
+      TaskDefinition: !Ref 'AgentTaskDefinition'
+  Up9DnsNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties: 
+      Name: !Ref 'Up9DnsNamespaceName'
+      Vpc: !Ref 'Vpc'
+  AuthHelperSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow agent to reach auth-helper
+      SecurityGroupIngress: 
+        - CidrIp: '0.0.0.0/0'
+          Description: auth-helper port
+          FromPort: !Ref 'AuthHelperPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'AuthHelperPort'
+        - CidrIpv6: '::/0'
+          Description: auth-helper port
+          FromPort: !Ref 'AuthHelperPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'AuthHelperPort'
+      VpcId: !Ref 'Vpc'
+  AuthHelperServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties: 
+      DnsConfig: 
+        DnsRecords: 
+          - TTL: 60
+            Type: A
+        NamespaceId: !Ref 'Up9DnsNamespace'
+  AuthHelperTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: awsvpc
+      ContainerDefinitions: 
+        - Name: up9-auth-helper
+          Image: !Ref 'AuthHelperImage'
+          Memory: '500'
+  AuthHelperService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref 'Subnet'
+          SecurityGroups:
+            - !Ref 'AuthHelperSecurityGroup'
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn: !GetAtt
+            - AuthHelperServiceDiscovery
+            - Arn
+      TaskDefinition: !Ref 'AuthHelperTaskDefinition'

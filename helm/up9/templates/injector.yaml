@@ -1,0 +1,209 @@
+{{ if .Values.sidecarInjectionEnabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "up9-sidecar-injector"
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: "up9-sidecar-injector"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "up9-sidecar-injector"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: "up9-sidecar-injector"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: up9-sidecar-injector
+      containers:
+      - name: "up9-sidecar-injector"
+        imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
+        image: {{ .Values.sidecarInjector.sidecarInjectorImage.path }}
+        command: ["entrypoint.sh"]
+        args: []
+        ports:
+        - name: https
+          containerPort: 9443
+        - name: http-metrics
+          containerPort: 9000
+        volumeMounts:
+        - name: secrets
+          mountPath: /var/lib/secrets
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /health
+            port: https
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+        env:
+        - name: "TLS_CERT_FILE"
+          value: "/var/lib/secrets/sidecar-injector.crt"
+        - name: "TLS_KEY_FILE"
+          value: "/var/lib/secrets/sidecar-injector.key"
+        - name: "LOG_LEVEL"
+          value: "2"
+        - name: "CONFIG_DIR"
+          value: "conf/"
+        - name: "CONFIGMAP_LABELS"
+          value: "app=up9-sidecar-injector"
+        - name: "ANNOTATION_NAMESPACE"
+          value: {{ .Values.sidecarInjector.annotationNamespace }}
+---
+# TODO: TRA-738 (to support namespace other than 'up9')
+apiVersion: v1
+data:
+  sidecar-injector.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUwRENDQXJpZ0F3SUJBZ0lKQVBkRDJYYmkwSVNsTUEwR0NTcUdTSWIzRFFFQkN3VUFNSUdGTVFzd0NRWUQKVlFRR0V3SlZVekVSTUE4R0ExVUVDQXdJVG1WM0lGbHZjbXN4RmpBVUJnTlZCQWNNRFU1bGR5QlpiM0pySUVOcApkSGt4RERBS0JnTlZCQW9NQTNWd09URWdNQjRHQTFVRUF3d1hkWEE1TFhOcFpHVmpZWEl0YVc1cVpXTjBiM0l0ClEwRXhHekFaQmdrcWhraUc5dzBCQ1FFV0RHNTFiR3hBZFhBNUxtTnZiVEFnRncweU1EQXhNekV4TkRFMk1UbGEKR0E4ME56VTNNVEl5TnpFME1UWXhPVm93V3pFTE1Ba0dBMVVFQmhNQ1ZWTXhFVEFQQmdOVkJBZ01DRTVsZHlCWgpiM0pyTVF3d0NnWURWUVFIREFOT1dVTXhEREFLQmdOVkJBb01BM1Z3T1RFZE1Cc0dBMVVFQXd3VWRYQTVMWE5wClpHVmpZWEl0YVc1cVpXTjBiM0l3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRREcKdE1VSEI3c09senczTC8waGN4NEtpK0RTQUVGRVEzdTJjcTdPdUtjVG5wQ0JQc1BTdE8rcEpFUXlYNHc0UzJBQgpDY1lhRkcxMzZXYVpmbDNhKzdjaTcrMUQ2R3NWV1lKNm43eVM4U0orVUpTa2Q2cEVaM2tCNUlRdFRoSFh0QnFjCnNRSlVJTFFSUTNveCt4STVpUmJjNzRZOWRySk5TTzYrdkVFNmhoaTRlOTVhWXY0aDhWcC92K1RaSHpBRllPRWUKeVBRLzRhQzQxamRlSGFaa1F6UzdwLzF3LzJBSVhFSDZ5djF2V3VSVVVFL3A3NEIwaTNxMHAvdG1hV1R3M2FNdwowL25RR1d5STBsS2hGU0QvRlRZMHRkWmlQT25Sdk1wMDhIdEt4Z3AycFVndno2eFFkWTNOL1RENkpKREpXVzFHCjlVblRCL3k5NllnV0o0V21hRTJmQWdNQkFBR2phakJvTUdZR0ExVWRFUVJmTUYyQ0dYVndPUzF6YVdSbFkyRnkKTFdsdWFtVmpkRzl5TFhCeWIyU0NIWFZ3T1MxemFXUmxZMkZ5TFdsdWFtVmpkRzl5TFhCeWIyUXVkWEE1Z2lGMQpjRGt0YzJsa1pXTmhjaTFwYm1wbFkzUnZjaTF3Y205a0xuVndPUzV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFECmdnSUJBRldYR2VMYkFvbWtIZ2x6TGloZ1Y4TnhtVUQyQ29OR3lpdXNHbFRhU2hXSDBWQ2xJNktUbjE4OEVtN0EKRU1PRHAxcEIzQ3hNODF2TWVJVlN5d0RWTnIrL1RDZmhhc1dYcDBva3dEYjZiZkE5UWhnYjNPcTdLQkovUUhVaApoYTVZWklQMkhMdnl0Mlk2ZGoxS254YzlNS3pnUUZrTGtVRUdvVk9CUkhiQjQzV3hsckJYSEdwL1JKaGxDNkhkCktKUldabmVOamZlQ1RXa2lWUE1YNkxvVkp3OUVzTjNLZGtHSVB4UmZqZzhmb0daNjR5aXZLaHk2Z2cyMmhvRGsKb0w2a1hQUWg5THpOeXIreDE4Uk5FZ2ZBWmZ4d0FtQ0ZNM3dqNlZBSFRGdis4Ukd5M1lTd2hSOGRiMC9JNE5xVQowaUR0TmkrYWxyeHZYQnVBSVUvQnVJM3VEdkltSE03ODVEaU1HbXRMVWMycm9ycHc4QXNRTTdmYng1ZS9lMkczCi82d0N4bzVQODQ0Ulk1Z3d4dmtydkkzQ1FqS0hQeHZINWNVYlhvQnlTTWh3V0hVSTgzTDJnbkRUNWdjTXNuMGkKWVhmZU1BcC90NzZlNlMxZDJTSEpXRmt4dVFJaHh2NGwrL1d1enFIaEVZTFY2LzJoaE1xV282OGJSd0ZaUXJ1UwpISEZrb0FKMEpJa3FmaG1RNHBsMjJGRU1nOTVERS85N2tiVm9DNS8vdjRQZTEyNFprbGdsbTd5Q0JTSDRkNGcvCng0bVd2Yjc1Vjc3dTZLVkRLb3NjK0s1K2hsUkNUQjJHUE9vYVM3b2hNL2NYRjNlQ056NG1WMlNmQ1FYeXJnbnkKYk14QkwwU1ZmaDlOcmdBV2NLQkpWUnVIdkVFSzZFMGYwUEFYR2o5RVFyQys0TTIvCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  sidecar-injector.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBeHJURkJ3ZTdEcGM4TnkvOUlYTWVDb3ZnMGdCQlJFTjd0bkt1enJpbkU1NlFnVDdECjByVHZxU1JFTWwrTU9FdGdBUW5HR2hSdGQrbG1tWDVkMnZ1M0l1L3RRK2hyRlZtQ2VwKzhrdkVpZmxDVXBIZXEKUkdkNUFlU0VMVTRSMTdRYW5MRUNWQ0MwRVVONk1mc1NPWWtXM08rR1BYYXlUVWp1dnJ4Qk9vWVl1SHZlV21MKwpJZkZhZjcvazJSOHdCV0RoSHNqMFArR2d1TlkzWGgybVpFTTB1NmY5Y1A5Z0NGeEIrc3I5YjFya1ZGQlA2ZStBCmRJdDZ0S2Y3Wm1sazhOMmpNTlA1MEJsc2lOSlNvUlVnL3hVMk5MWFdZanpwMGJ6S2RQQjdTc1lLZHFWSUw4K3MKVUhXTnpmMHcraVNReVZsdFJ2Vkowd2Y4dmVtSUZpZUZwbWhObndJREFRQUJBb0lCQUdrL3JMREpsbm5tL3owWQpEUkxmbjhUa1RFUFBZTUtnbi9HR2t6THB1WTE1eW42NjJReE5URGdoL29GVC9MaUFyQ3hBbWc2TVRXTmJYRDNuCkloMXdnSk5mMUNQSkFwYy9YdzVHZDZLNVdKVGhaNm9wdkNVWlRZNEVGVUxOL0VOdG9UN252eDBDYVg1UGFIVDYKMEs5cS9wSXR5TVBia0J2QmlydTZpUzVQZ3Q2THhuM0Q5VG5jRTFLaGMrMHBFZkhNT01FdHFnTXNlWnpMc3A0cwpseUk5Z05LdjdhSWVzeVdjcVBlWGhYQVVVV09rNUMyejRNcXFnL3Q2TVcraE1ldUU5WTdYbEhDRlZ5V1g0aldoCkIzbFltZjFBUUlyd0dWYnpvb2VmcG5JbGxZMEVITHZRTERmTmxvK0Z1SzgyRkptYk02RGUrY0NiS3hVTGtkVUcKMUtkWHZMa0NnWUVBN1kwYzd0Q0pzbnluSGZkNlBkYURJM1B2U1BxNUhuZGloWFBVMnVJYXAzYlErK2dRcHJsdgpnVE5xZ2lvUjdSZ1k4TTBkdWNjaUlZbmU0Z2lvRGZOTlhSME5yR1E3TlBBb2IxRnpPVm1YM2JCaXFIUVBDWXNIClV0WnBTRGFmMWczdmJKdnZUVSt5cXU0NHh6Q2duQlg1MElEUm5rSit3UTlPVDRud0J0b0M2dTBDZ1lFQTFpTmIKSFdYU3liOFV2d1B4d055VnN6NXdMN3E1R1pPTG8wVVVzb2dJQ1RyVml4NDNvUFpBakZQaWNsbWlQNTVtMmY1cApzeWptUzBmUHNWaTRreFVHQ0lkcXpUMXNaY2p5S1hwbG02czl5NFVjdTZ2K1RvejBJSVY5VHpqbm9kTHFzVDFkCkpQaWU5KzJmVVJGR0NlMXpnQm15d2cybVFVNnpQY3ROamptaXJUc0NnWUVBNmdjc3F1WU4waWJXS1VLblRvYW4KK1dSOUorUENQbzZWSkM2Q1ZBV1BCczZhZ3FJVXpYeEFxd094ZVh6aTNqYndVME53ZHBjRlBBOXM0amh2QUJkagpiMGx4TUJZcThqTnJVb2Ztd1doUG9scmtSMXJYZWFwYlU3UGlVdjlscG1kaUtoalJ2OU8xaklwV3EzNXZySFpGCi83RDVValhtVkdLMDNzMWhDQTc5OHQwQ2dZRUF2SHFhTkNIdmlvdVpZeGZCcmhONTRDN1E1L0hlQWxrUHkwRisKbWpXSmZUWS94eGR0dDB1SVBQdUlrVVc3dld0YTgvMHVZL2RYM0dMMHVCQnpSV0ozMFFJQVMyNEkvdjREeCtabgprTUVFdnlJR3pGanltWWtQUjZDM1R3ZXpPWWcvOG9ra2R1b3VZZUxSRzdXc2hBaHdaUXc1ZnZ3c25jYjdsU1JnCnV4S1gwUWtDZ1lFQW56WG9mZk50dENzWWhlOXpWdk5iVjJPRkVmb0o3enBZaStWZGxDck10eklGOUcva2YxTS8KQjQ1MDIzQnlva3BJWVBZRFRrYk5pR21ESThxcHF3amh0bGxGRnpnNjhiYVJPRURuM3g3SytuNDBHbUY4Mkp2VQpPcVNhd1g1M0pDb3VBZFlwWkFwRzU5SWRSRW1veTg3RzZBbmwwazRNS0pSYnd5TEhudUlOU2dzPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+kind: Secret
+metadata:
+  name: up9-sidecar-injector
+  namespace: {{ .Values.namespace }}
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: up9-sidecar-injector-prod
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: up9-sidecar-injector
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 443
+    targetPort: https
+    protocol: TCP
+  - name: http-metrics
+    port: 80
+    targetPort: http-metrics
+    protocol: TCP
+  selector:
+    app: up9-sidecar-injector
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: "up9-sidecar-injector-webhook"
+  labels:
+    app: up9-sidecar-injector
+webhooks:
+- name: "www.up9.com"
+  objectSelector: {}
+  namespaceSelector: {}
+  failurePolicy: "Ignore" # we fail "open" if the webhook is down hard
+  timeoutSeconds: 2
+  rules:
+  - operations: [ "CREATE" ]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  clientConfig:
+    service:
+      name: "up9-sidecar-injector-prod"
+      namespace: {{ .Values.namespace }}
+      path: "/mutate"   # what /url/slug to send requests at
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUwRENDQXJpZ0F3SUJBZ0lKQVBkRDJYYmkwSVNsTUEwR0NTcUdTSWIzRFFFQkN3VUFNSUdGTVFzd0NRWUQKVlFRR0V3SlZVekVSTUE4R0ExVUVDQXdJVG1WM0lGbHZjbXN4RmpBVUJnTlZCQWNNRFU1bGR5QlpiM0pySUVOcApkSGt4RERBS0JnTlZCQW9NQTNWd09URWdNQjRHQTFVRUF3d1hkWEE1TFhOcFpHVmpZWEl0YVc1cVpXTjBiM0l0ClEwRXhHekFaQmdrcWhraUc5dzBCQ1FFV0RHNTFiR3hBZFhBNUxtTnZiVEFnRncweU1EQXhNekV4TkRFMk1UbGEKR0E4ME56VTNNVEl5TnpFME1UWXhPVm93V3pFTE1Ba0dBMVVFQmhNQ1ZWTXhFVEFQQmdOVkJBZ01DRTVsZHlCWgpiM0pyTVF3d0NnWURWUVFIREFOT1dVTXhEREFLQmdOVkJBb01BM1Z3T1RFZE1Cc0dBMVVFQXd3VWRYQTVMWE5wClpHVmpZWEl0YVc1cVpXTjBiM0l3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRREcKdE1VSEI3c09senczTC8waGN4NEtpK0RTQUVGRVEzdTJjcTdPdUtjVG5wQ0JQc1BTdE8rcEpFUXlYNHc0UzJBQgpDY1lhRkcxMzZXYVpmbDNhKzdjaTcrMUQ2R3NWV1lKNm43eVM4U0orVUpTa2Q2cEVaM2tCNUlRdFRoSFh0QnFjCnNRSlVJTFFSUTNveCt4STVpUmJjNzRZOWRySk5TTzYrdkVFNmhoaTRlOTVhWXY0aDhWcC92K1RaSHpBRllPRWUKeVBRLzRhQzQxamRlSGFaa1F6UzdwLzF3LzJBSVhFSDZ5djF2V3VSVVVFL3A3NEIwaTNxMHAvdG1hV1R3M2FNdwowL25RR1d5STBsS2hGU0QvRlRZMHRkWmlQT25Sdk1wMDhIdEt4Z3AycFVndno2eFFkWTNOL1RENkpKREpXVzFHCjlVblRCL3k5NllnV0o0V21hRTJmQWdNQkFBR2phakJvTUdZR0ExVWRFUVJmTUYyQ0dYVndPUzF6YVdSbFkyRnkKTFdsdWFtVmpkRzl5TFhCeWIyU0NIWFZ3T1MxemFXUmxZMkZ5TFdsdWFtVmpkRzl5TFhCeWIyUXVkWEE1Z2lGMQpjRGt0YzJsa1pXTmhjaTFwYm1wbFkzUnZjaTF3Y205a0xuVndPUzV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFECmdnSUJBRldYR2VMYkFvbWtIZ2x6TGloZ1Y4TnhtVUQyQ29OR3lpdXNHbFRhU2hXSDBWQ2xJNktUbjE4OEVtN0EKRU1PRHAxcEIzQ3hNODF2TWVJVlN5d0RWTnIrL1RDZmhhc1dYcDBva3dEYjZiZkE5UWhnYjNPcTdLQkovUUhVaApoYTVZWklQMkhMdnl0Mlk2ZGoxS254YzlNS3pnUUZrTGtVRUdvVk9CUkhiQjQzV3hsckJYSEdwL1JKaGxDNkhkCktKUldabmVOamZlQ1RXa2lWUE1YNkxvVkp3OUVzTjNLZGtHSVB4UmZqZzhmb0daNjR5aXZLaHk2Z2cyMmhvRGsKb0w2a1hQUWg5THpOeXIreDE4Uk5FZ2ZBWmZ4d0FtQ0ZNM3dqNlZBSFRGdis4Ukd5M1lTd2hSOGRiMC9JNE5xVQowaUR0TmkrYWxyeHZYQnVBSVUvQnVJM3VEdkltSE03ODVEaU1HbXRMVWMycm9ycHc4QXNRTTdmYng1ZS9lMkczCi82d0N4bzVQODQ0Ulk1Z3d4dmtydkkzQ1FqS0hQeHZINWNVYlhvQnlTTWh3V0hVSTgzTDJnbkRUNWdjTXNuMGkKWVhmZU1BcC90NzZlNlMxZDJTSEpXRmt4dVFJaHh2NGwrL1d1enFIaEVZTFY2LzJoaE1xV282OGJSd0ZaUXJ1UwpISEZrb0FKMEpJa3FmaG1RNHBsMjJGRU1nOTVERS85N2tiVm9DNS8vdjRQZTEyNFprbGdsbTd5Q0JTSDRkNGcvCng0bVd2Yjc1Vjc3dTZLVkRLb3NjK0s1K2hsUkNUQjJHUE9vYVM3b2hNL2NYRjNlQ056NG1WMlNmQ1FYeXJnbnkKYk14QkwwU1ZmaDlOcmdBV2NLQkpWUnVIdkVFSzZFMGYwUEFYR2o5RVFyQys0TTIvCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-sidecar-passive
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-sidecar-passive: |
+    name: up9-sidecar-passive
+    labels:
+      up9-tapper: passive
+    containers:
+      - name: sidecar-up9-passive
+        image: {{ .Values.sidecarInjector.up9InjectedPassiveTapperImage.path }}
+        imagePullPolicy: {{ .Values.sidecarInjector.up9InjectedPassiveTapperImage.imagePullPolicy }}
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+          privileged: true
+          runAsUser: 0
+        env:
+          - name: WEB_SOCKET_PORT
+            value: {{ .Values.passiveTapper.port }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-sidecar-envoy
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-sidecar-envoy: |
+    name: up9-sidecar-envoy
+    labels:
+      up9-tapper: envoy
+    containers:
+    - name: sidecar-up9-envoy
+      image: {{ .Values.sidecarInjector.up9InjectedEnvoyImage.path }}
+      imagePullPolicy: {{ .Values.sidecarInjector.up9InjectedEnvoyImage.imagePullPolicy }}
+      securityContext:
+        runAsUser: {{ .Values.envoy.envoyUserId }}
+        allowPrivilegeEscalation: true
+      env:
+      - name: ENVOY_ADMIN_PORT
+        value: {{ .Values.envoy.adminTapPort }}
+      - name: ENVOY_RANGE_BEGIN_PORT
+        value: {{ .Values.envoy.proxyListenPortRangeBegin }}
+      - name: ENVOY_EGRESS_PORT
+        value: {{ .Values.envoy.egressPort }}
+    initContainers:
+    - name: up9-init
+      image: {{ .Values.sidecarInjector.up9InjectedInitImage.path }}
+      imagePullPolicy: {{ .Values.sidecarInjector.up9InjectedInitImage.imagePullPolicy }}
+      securityContext:
+        capabilities:
+          add:
+          - NET_ADMIN
+        privileged: true
+      env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: ENVOY_RANGE_BEGIN_PORT
+          value: {{ .Values.envoy.proxyListenPortRangeBegin }}
+        - name: ENVOY_EGRESS_PORT
+          value: {{ .Values.envoy.egressPort }}
+        - name: ENVOY_ADMIN_PORT
+          value: {{ .Values.envoy.adminTapPort }}
+        - name: ENVOY_USER_ID
+          value: {{ .Values.envoy.envoyUserId }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: up9-injector-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: up9-sidecar-injector
+data:
+  up9-injector-config: |
+    name: up9-injector-config
+---
+{{ end }}

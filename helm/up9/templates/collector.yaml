@@ -1,0 +1,62 @@
+{{ if .Values.sidecarInjectionEnabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: {{ .Values.collector.resourcesName }}-daemonset
+  name: {{ .Values.collector.resourcesName }}-daemonset
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ .Values.collector.resourcesName }}-daemonset
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.collector.resourcesName }}-daemonset
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: UP9_ENV_SUFFIX
+              value: {{ .Values.up9EnvSuffix | quote }}
+            - name: PASSIVE_TAPPER_PORT
+              value: {{ .Values.passiveTapper.port | quote }}
+            - name: ENVOY_ADMIN_PORT
+              value: {{ .Values.envoy.adminTapPort | quote }}
+            - name: CLIENT_ID
+              value: {{ .Values.clientId | quote }}
+            - name: CLIENT_SECRET
+              value: {{ .Values.clientSecret | quote }}
+            - name: AGENT_NAME
+              value: {{ .Values.agentName | quote }}
+            - name: UP9_DISABLE_LOGS_STDOUT
+              value: {{ .Values.logging.disableStdoutLogging | quote }}
+            - name: UP9_DISABLE_LOGS_STDERR
+              value: {{ .Values.logging.disableStderrLogging | quote }}
+            - name: UP9_DISABLE_LOGS_CLOUD
+              value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          image: {{ .Values.collector.image.path }}
+          imagePullPolicy: {{ .Values.collector.image.imagePullPolicy }}
+          name: {{ .Values.collector.resourcesName }}-daemonset
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+{{ end }}

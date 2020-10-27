@@ -1,0 +1,319 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  ClusterName:
+    Type: String
+  TrdemoClientImage:
+    Type: String
+    Default: gcr.io/up9-docker-hub/trdemo/trdemo-client/develop:latest
+  TrdemoUsersImage:
+    Type: String
+    Default: gcr.io/up9-docker-hub/trdemo/trdemo-users/develop:latest
+  TrdemoFlightsImage:
+    Type: String
+    Default: gcr.io/up9-docker-hub/trdemo/trdemo-flights/develop:latest
+  TrdemoShoppingcartImage:
+    Type: String
+    Default: gcr.io/up9-docker-hub/trdemo/trdemo-shoppingcart/develop:latest
+  Vpc:
+    Type: String
+  Subnet1:
+    Type: String
+  Subnet2:
+    Type: String
+  TrdemoDnsNamespaceName:
+    Type: String
+    Default: trdemo
+  TrdemoClientContainerName:
+    Type: String
+    Default: trdemo-client
+  TrdemoFlightsContainerName:
+    Type: String
+    Default: trdemo-flights
+  TrdemoUsersContainerName:
+    Type: String
+    Default: trdemo-users
+  TrdemoShoppingcartContainerName:
+    Type: String
+    Default: trdemo-shoppingcart
+  TrdemoClientPort:
+    Type: Number
+    Default: 5000
+  TrdemoFlightsPort:
+    Type: Number
+    Default: 5100
+  TrdemoUsersPort:
+    Type: Number
+    Default: 5200
+  TrdemoShoppingcartPort:
+    Type: Number
+    Default: 5300
+Resources:
+  TrdemoDnsNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties: 
+      Name: !Ref 'TrdemoDnsNamespaceName'
+      Vpc: !Ref 'Vpc'
+  TrdemoSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow trdemo microservices to communicate
+      SecurityGroupIngress: 
+        - CidrIp: '0.0.0.0/0'
+          Description: trdemo client port
+          FromPort: !Ref 'TrdemoClientPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoClientPort'
+        - CidrIp: '0.0.0.0/0'
+          Description: trdemo flights port
+          FromPort: !Ref 'TrdemoFlightsPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoFlightsPort'
+        - CidrIp: '0.0.0.0/0'
+          Description: trdemo users port
+          FromPort: !Ref 'TrdemoUsersPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoUsersPort'
+        - CidrIp: '0.0.0.0/0'
+          Description: trdemo shoppingcart port
+          FromPort: !Ref 'TrdemoShoppingcartPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoShoppingcartPort'
+        - CidrIpv6: '::/0'
+          Description: trdemo client port
+          FromPort: !Ref 'TrdemoClientPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoClientPort'
+        - CidrIpv6: '::/0'
+          Description: trdemo flights port
+          FromPort: !Ref 'TrdemoFlightsPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoFlightsPort'
+        - CidrIpv6: '::/0'
+          Description: trdemo users port
+          FromPort: !Ref 'TrdemoUsersPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoUsersPort'
+        - CidrIpv6: '::/0'
+          Description: trdemo shoppingcart port
+          FromPort: !Ref 'TrdemoShoppingcartPort'
+          IpProtocol: tcp
+          ToPort: !Ref 'TrdemoShoppingcartPort'
+      VpcId: !Ref 'Vpc'
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow load balancer to accept HTTP
+      SecurityGroupIngress: 
+        - CidrIp: '0.0.0.0/0'
+          Description: HTTP
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+        - CidrIpv6: '::/0'
+          Description: HTTP
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId: !Ref 'Vpc'
+  TrdemoClientServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties: 
+      DnsConfig: 
+        DnsRecords: 
+          - TTL: 60
+            Type: A
+        NamespaceId: !Ref 'TrdemoDnsNamespace'
+      Name: !Ref 'TrdemoClientContainerName'
+  TrdemoFlightsServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties: 
+      DnsConfig: 
+        DnsRecords: 
+          - TTL: 60
+            Type: A
+        NamespaceId: !Ref 'TrdemoDnsNamespace'
+      Name: !Ref 'TrdemoFlightsContainerName'
+  TrdemoUsersServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties: 
+      DnsConfig: 
+        DnsRecords: 
+          - TTL: 60
+            Type: A
+        NamespaceId: !Ref 'TrdemoDnsNamespace'
+      Name: !Ref 'TrdemoUsersContainerName'
+  TrdemoShoppingcartServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties: 
+      DnsConfig: 
+        DnsRecords: 
+          - TTL: 60
+            Type: A
+        NamespaceId: !Ref 'TrdemoDnsNamespace'
+      Name: !Ref 'TrdemoShoppingcartContainerName'
+  TrdemoLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref 'LoadBalancerSecurityGroup'
+      Subnets:
+        - !Ref 'Subnet1'
+        - !Ref 'Subnet2'
+      Type: application
+  TrdemoTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref Vpc
+  TrdemoListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions: 
+        - TargetGroupArn: !Ref 'TrdemoTargetGroup'
+          Type: forward
+      LoadBalancerArn: !Ref 'TrdemoLoadBalancer'
+      Port: 80
+      Protocol: HTTP
+  TrdemoClientTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: awsvpc
+      ContainerDefinitions: 
+        - Name: !Ref 'TrdemoClientContainerName'
+          Image: !Ref 'TrdemoClientImage'
+          Memory: '500'
+          PortMappings:
+            - ContainerPort: !Ref 'TrdemoClientPort'
+          Environment:
+            - Name: TRDEMO_FLIGHTS_SERVICE_HOST
+              Value: !Join
+                - '.'
+                - - !GetAtt
+                    - TrdemoFlightsServiceDiscovery
+                    - Name
+                  - !Ref 'TrdemoDnsNamespaceName'              
+            - Name: TRDEMO_FLIGHTS_SERVICE_PORT
+              Value: !Ref 'TrdemoFlightsPort'
+            - Name: TRDEMO_USERS_SERVICE_HOST
+              Value: !Join
+                - '.'
+                - - !GetAtt
+                    - TrdemoUsersServiceDiscovery
+                    - Name
+                  - !Ref 'TrdemoDnsNamespaceName'              
+            - Name: TRDEMO_USERS_SERVICE_PORT
+              Value: !Ref 'TrdemoUsersPort'
+            - Name: TRDEMO_SHOPPINGCART_SERVICE_HOST
+              Value: !Join
+                - '.'
+                - - !GetAtt
+                    - TrdemoShoppingcartServiceDiscovery
+                    - Name
+                  - !Ref 'TrdemoDnsNamespaceName'              
+            - Name: TRDEMO_SHOPPINGCART_SERVICE_PORT
+              Value: !Ref 'TrdemoShoppingcartPort'
+  TrdemoClientService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - TrdemoListener
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      DesiredCount: 1
+      LaunchType: EC2
+      LoadBalancers:
+        - ContainerName: !Ref 'TrdemoClientContainerName'
+          ContainerPort: !Ref 'TrdemoClientPort'
+          TargetGroupArn: !Ref 'TrdemoTargetGroup'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref 'Subnet1'
+          SecurityGroups:
+            - !Ref 'TrdemoSecurityGroup'
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn: !GetAtt
+            - TrdemoClientServiceDiscovery
+            - Arn
+      TaskDefinition: !Ref 'TrdemoClientTaskDefinition'
+  TrdemoFlightsTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: awsvpc
+      ContainerDefinitions: 
+        - Name: !Ref 'TrdemoFlightsContainerName'
+          Image: !Ref 'TrdemoFlightsImage'
+          Memory: '500'
+  TrdemoFlightsService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref 'Subnet1'
+          SecurityGroups:
+            - !Ref 'TrdemoSecurityGroup'
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn: !GetAtt
+            - TrdemoFlightsServiceDiscovery
+            - Arn
+      TaskDefinition: !Ref 'TrdemoFlightsTaskDefinition'
+  TrdemoUsersTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: awsvpc
+      ContainerDefinitions: 
+        - Name: !Ref 'TrdemoUsersContainerName'
+          Image: !Ref 'TrdemoUsersImage'
+          Memory: '500'
+  TrdemoUsersService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref 'Subnet1'
+          SecurityGroups:
+            - !Ref 'TrdemoSecurityGroup'
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn: !GetAtt
+            - TrdemoUsersServiceDiscovery
+            - Arn
+      TaskDefinition: !Ref 'TrdemoUsersTaskDefinition'
+  TrdemoShoppingcartTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      NetworkMode: awsvpc
+      ContainerDefinitions: 
+        - Name: !Ref 'TrdemoShoppingcartContainerName'
+          Image: !Ref 'TrdemoShoppingcartImage'
+          Memory: '500'
+  TrdemoShoppingcartService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ClusterName'
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref 'Subnet1'
+          SecurityGroups:
+            - !Ref 'TrdemoSecurityGroup'
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn: !GetAtt
+            - TrdemoShoppingcartServiceDiscovery
+            - Arn
+      TaskDefinition: !Ref 'TrdemoShoppingcartTaskDefinition'

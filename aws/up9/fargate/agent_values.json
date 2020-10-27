@@ -1,0 +1,50 @@
+[
+    {
+        "ParameterKey": "ClusterName",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "ClientId",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "ClientSecret",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "up9EnvSuffix",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "AgentName",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "TestRunnerVersion",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "InstanceRole",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Vpc",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "Subnet",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "TestRunnerImage",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "TrccAgentImage",
+        "ParameterValue":
+    },
+    {
+        "ParameterKey": "AuthHelperImage",
+        "ParameterValue":
+    }
+]
