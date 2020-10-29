@@ -28,7 +28,7 @@ sidecarInjectionEnabled: true
 collector:
   resourcesName: up9-collector
   image:
-    path: gcr.io/up9-docker-hub/collector/master:latest
+    path: gcr.io/up9-docker-hub/collector/feature/tra-1579_improve_images:latest
     imagePullPolicy: Always
 
 sidecarInjector:
@@ -38,14 +38,6 @@ sidecarInjector:
 
   annotationNamespace: injector.up9
 
-  up9InjectedEnvoyImage:
-    path: gcr.io/up9-docker-hub/up9-envoy/develop:latest
-    imagePullPolicy: Always
-
-  up9InjectedInitImage:
-    path: gcr.io/up9-docker-hub/up9-inject-init/develop:latest
-    imagePullPolicy: Always
-
   up9InjectedPassiveTapperImage:
     path: gcr.io/up9-docker-hub/passive-tapper/master:latest
     imagePullPolicy: Always
@@ -53,11 +45,6 @@ sidecarInjector:
 passiveTapper:
   port: 25111
 
-envoy:
-  adminTapPort: 21213
-  proxyListenPortRangeBegin: 21214
-  egressPort: 21212
-  envoyUserId: 1337
 
 logging:
   disableStdoutLogging: 0

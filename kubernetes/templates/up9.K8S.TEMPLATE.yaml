@@ -56,57 +56,6 @@ data:
           - name: WEB_SOCKET_PORT
             value: 25111
 ---
-# Source: up9/templates/injector.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: up9-sidecar-envoy
-  namespace: up9
-  labels:
-    app: up9-sidecar-injector
-data:
-  up9-sidecar-envoy: |
-    name: up9-sidecar-envoy
-    labels:
-      up9-tapper: envoy
-    containers:
-    - name: sidecar-up9-envoy
-      image: gcr.io/up9-docker-hub/up9-envoy/develop:latest
-      imagePullPolicy: Always
-      securityContext:
-        runAsUser: 1337
-        allowPrivilegeEscalation: true
-      env:
-      - name: ENVOY_ADMIN_PORT
-        value: 21213
-      - name: ENVOY_RANGE_BEGIN_PORT
-        value: 21214
-      - name: ENVOY_EGRESS_PORT
-        value: 21212
-    initContainers:
-    - name: up9-init
-      image: gcr.io/up9-docker-hub/up9-inject-init/develop:latest
-      imagePullPolicy: Always
-      securityContext:
-        capabilities:
-          add:
-          - NET_ADMIN
-        privileged: true
-      env:
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: status.podIP
-        - name: ENVOY_RANGE_BEGIN_PORT
-          value: 21214
-        - name: ENVOY_EGRESS_PORT
-          value: 21212
-        - name: ENVOY_ADMIN_PORT
-          value: 21213
-        - name: ENVOY_USER_ID
-          value: 1337
----
 # Source: up9/templates/up9-clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -221,8 +170,6 @@ spec:
               value: "up9.app"
             - name: PASSIVE_TAPPER_PORT
               value: "25111"
-            - name: ENVOY_ADMIN_PORT
-              value: "21213"
             - name: CLIENT_ID
               value: "__TMPL_CLIENT_ID__"
             - name: CLIENT_SECRET

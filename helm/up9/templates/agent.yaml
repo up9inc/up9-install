@@ -1,11 +1,11 @@
-{{ if .Values.agent.enabled }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: {{ .Values.agent.resourcesName }}
   name: {{ .Values.agent.resourcesName }}
-  namespace: {{ .Values.namespace  }}
+  namespace: {{ .Values.namespace }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -19,31 +19,109 @@ spec:
       namespace: {{ .Values.namespace }}
     spec:
       containers:
-      - env:
-        - name: UP9_ENV_SUFFIX
-          value: {{ .Values.up9EnvSuffix }}
-        - name: AGENT_NAME
-          value: {{ required ".Values.agentName parameter is Required" .Values.agentName }}
-        - name: CLIENT_ID
-          value: {{ required ".Values.clientId parameter is Required" .Values.clientId }}
-        - name: CLIENT_SECRET
-          value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
-        - name: AUTH_HELPER_SERVER
-          value: {{ .Values.authHelper.resourcesName }}
-        - name: TEST_RUNNER_VERSION
-          value: {{ .Values.agent.testRunnerVersion }}
-        - name: K8S_NAMESPACE
-          value: {{ .Values.namespace }}
-        - name: UP9_DISABLE_LOGS_STDOUT
-          value: {{ .Values.logging.disableStdoutLogging | quote }}
-        - name: UP9_DISABLE_LOGS_STDERR
-          value: {{ .Values.logging.disableStderrLogging | quote }}
-        - name: UP9_DISABLE_LOGS_CLOUD
-          value: {{ .Values.logging.disableShipToUP9Logging | quote }}
-        image: {{ .Values.agent.image.path }}
-        imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
-        name: {{ .Values.agent.resourcesName }}
+        - env:
+            - name: UP9_ENV_SUFFIX
+              value: {{ .Values.up9EnvSuffix }}
+            - name: AGENT_NAME
+              value: {{ required ".Values.agentName parameter is Required" .Values.agentName }}
+            - name: CLIENT_ID
+              value: {{ required ".Values.clientId parameter is Required" .Values.clientId }}
+            - name: CLIENT_SECRET
+              value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
+            - name: AUTH_HELPER_SERVER
+              value: {{ .Values.authHelper.resourcesName }}
+            - name: TEST_RUNNER_VERSION
+              value: {{ .Values.agent.testRunnerVersion }}
+            - name: K8S_NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: UP9_DISABLE_LOGS_STDOUT
+              value: {{ .Values.logging.disableStdoutLogging | quote }}
+            - name: UP9_DISABLE_LOGS_STDERR
+              value: {{ .Values.logging.disableStderrLogging | quote }}
+            - name: UP9_DISABLE_LOGS_CLOUD
+              value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+          image: {{ .Values.agent.image.path }}
+          imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
+          name: {{ .Values.agent.resourcesName }}
+        - image: {{ .Values.authHelper.image.path }}
+          imagePullPolicy: {{ .Values.authHelper.image.imagePullPolicy }}
+          name: {{ .Values.authHelper.resourcesName }}
+          env:
+            - name: "UP9_DISABLE_LOGS_STDOUT"
+              value: {{ .Values.logging.disableStdoutLogging | quote }}
+        - name: "up9-sidecar-injector"
+          imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
+          image: {{ .Values.sidecarInjector.sidecarInjectorImage.path }}
+          command: [ "entrypoint.sh" ]
+          args: [ ]
+          ports:
+            - name: https
+              containerPort: 9443
+            - name: http-metrics
+              containerPort: 9000
+          volumeMounts:
+            - name: secrets
+              mountPath: /var/lib/secrets
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /health
+              port: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          env:
+            - name: "TLS_CERT_FILE"
+              value: "/var/lib/secrets/sidecar-injector.crt"
+            - name: "TLS_KEY_FILE"
+              value: "/var/lib/secrets/sidecar-injector.key"
+            - name: "LOG_LEVEL"
+              value: "2"
+            - name: "CONFIG_DIR"
+              value: "conf/"
+            - name: "CONFIGMAP_LABELS"
+              value: "app=up9-sidecar-injector"
+            - name: "ANNOTATION_NAMESPACE"
+              value: {{ .Values.sidecarInjector.annotationNamespace }}
       automountServiceAccountToken: true
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
-{{ end }}
+      volumes:
+        - name: secrets
+          secret:
+            secretName: up9-sidecar-injector
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authHelper.resourcesName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: app
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: {{ .Values.agent.resourcesName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: up9-sidecar-injector-prod
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      protocol: TCP
+    - name: http-metrics
+      port: 80
+      targetPort: http-metrics
+      protocol: TCP
+  selector:
+    app: {{ .Values.agent.resourcesName }}
+---
