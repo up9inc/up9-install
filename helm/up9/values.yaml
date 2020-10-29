@@ -10,7 +10,6 @@ up9EnvSuffix: up9.app
 
 
 agent:
-  enabled: true
   image:
     path: gcr.io/up9-docker-hub/trcc-agent/master:latest
     imagePullPolicy: Always
@@ -18,13 +17,12 @@ agent:
   testRunnerVersion: master:latest
 
 authHelper:
-  enabled: true
   image:
     path: gcr.io/up9-docker-hub/authentication-helper/master:latest
     imagePullPolicy: Always
   resourcesName: up9-auth-helper
 
-sidecarInjectionEnabled: true
+
 collector:
   resourcesName: up9-collector
   image:
@@ -39,12 +37,11 @@ sidecarInjector:
   annotationNamespace: injector.up9
 
   up9InjectedPassiveTapperImage:
-    path: gcr.io/up9-docker-hub/passive-tapper/master:latest
+    path: gcr.io/up9-docker-hub/passive-tapper/feature/tra-1579_improve_images:latest
     imagePullPolicy: Always
 
 passiveTapper:
   port: 25111
-
 
 logging:
   disableStdoutLogging: 0
