@@ -40,6 +40,11 @@ spec:
               value: {{ .Values.logging.disableStderrLogging | quote }}
             - name: UP9_DISABLE_LOGS_CLOUD
               value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
           image: {{ .Values.agent.image.path }}
           imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
           name: {{ .Values.agent.resourcesName }}
