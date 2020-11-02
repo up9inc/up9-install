@@ -46,6 +46,13 @@ spec:
           name: {{ .Values.collector.resourcesName }}-daemonset
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          resources:
+            requests:
+              cpu: {{ .Values.collector.requestCpu }}
+              memory: {{ .Values.collector.requestMemory }}
+            limits:
+              cpu: {{ .Values.collector.limitCpu }}
+              memory: {{ .Values.collector.limitMemory }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

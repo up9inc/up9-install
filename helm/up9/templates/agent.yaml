@@ -48,6 +48,13 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: {{ .Values.agent.requestCpu }}
+              memory: {{ .Values.agent.requestMemory }}
+            limits:
+              cpu: {{ .Values.agent.limitCpu }}
+              memory: {{ .Values.agent.limitMemory }}
         - name: {{ .Values.authHelper.resourcesName }}
           image: {{ .Values.authHelper.image.path }}
           imagePullPolicy: {{ .Values.authHelper.image.imagePullPolicy }}
@@ -57,6 +64,13 @@ spec:
           ports:
             - name: app
               containerPort: 3000
+          resources:
+            requests:
+              cpu: {{ .Values.authHelper.requestCpu }}
+              memory: {{ .Values.authHelper.requestMemory }}
+            limits:
+              cpu: {{ .Values.authHelper.limitCpu }}
+              memory: {{ .Values.authHelper.limitMemory }}
         - name: "up9-sidecar-injector"
           image: {{ .Values.sidecarInjector.sidecarInjectorImage.path }}
           imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
@@ -91,6 +105,13 @@ spec:
               value: "app=up9-sidecar-injector"
             - name: "ANNOTATION_NAMESPACE"
               value: {{ .Values.sidecarInjector.annotationNamespace }}
+          resources:
+            requests:
+              cpu: {{ .Values.sidecarInjector.requestCpu }}
+              memory: {{ .Values.sidecarInjector.requestMemory }}
+            limits:
+              cpu: {{ .Values.sidecarInjector.limitCpu }}
+              memory: {{ .Values.sidecarInjector.limitMemory }}
       automountServiceAccountToken: true
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
