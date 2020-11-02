@@ -22,6 +22,8 @@ spec:
               value: {{ .Values.up9EnvSuffix | quote }}
             - name: PASSIVE_TAPPER_PORT
               value: {{ .Values.passiveTapper.port | quote }}
+            - name: ENVOY_ADMIN_PORT
+              value: {{ .Values.envoy.adminTapPort | quote }}
             - name: CLIENT_ID
               value: {{ .Values.clientId | quote }}
             - name: CLIENT_SECRET
