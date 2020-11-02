@@ -19,7 +19,10 @@ spec:
       namespace: {{ .Values.namespace }}
     spec:
       containers:
-        - env:
+        - name: {{ .Values.agent.resourcesName }}
+          image: {{ .Values.agent.image.path }}
+          imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
+          env:
             - name: UP9_ENV_SUFFIX
               value: {{ .Values.up9EnvSuffix }}
             - name: AGENT_NAME
@@ -45,18 +48,18 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: {{ .Values.agent.image.path }}
-          imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
-          name: {{ .Values.agent.resourcesName }}
-        - image: {{ .Values.authHelper.image.path }}
+        - name: {{ .Values.authHelper.resourcesName }}
+          image: {{ .Values.authHelper.image.path }}
           imagePullPolicy: {{ .Values.authHelper.image.imagePullPolicy }}
-          name: {{ .Values.authHelper.resourcesName }}
           env:
             - name: "UP9_DISABLE_LOGS_STDOUT"
               value: {{ .Values.logging.disableStdoutLogging | quote }}
+          ports:
+            - name: app
+              containerPort: 3000
         - name: "up9-sidecar-injector"
-          imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
           image: {{ .Values.sidecarInjector.sidecarInjectorImage.path }}
+          imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
           command: [ "entrypoint.sh" ]
           args: [ ]
           ports:
