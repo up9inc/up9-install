@@ -11,7 +11,7 @@ up9EnvSuffix: up9.app
 
 agent:
   image:
-    path: gcr.io/up9-docker-hub/trcc-agent/develop:latest  # TODO: 
+    path: gcr.io/up9-docker-hub/trcc-agent/develop:latest  # TODO:
     imagePullPolicy: Always
   resourcesName: up9-test-agent
   testRunnerVersion: master:latest
@@ -27,7 +27,7 @@ authHelper:
     imagePullPolicy: Always
   resourcesName: up9-auth-helper
 
-  requestCpu: "1m"
+  requestCpu: "100m"
   requestMemory: "1Mi"
   limitCpu: "500m"
   limitMemory: "256Mi"
