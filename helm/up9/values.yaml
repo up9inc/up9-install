@@ -16,10 +16,10 @@ agent:
   resourcesName: up9-test-agent
   testRunnerVersion: master:latest
 
-  requestCpu: 0.1
-  requestMemory: 100Mi
-  limitCpu: 1
-  limitMemory: 512Mi
+  requestCpu: "100m"
+  requestMemory: "100Mi"
+  limitCpu: "500m"
+  limitMemory: "512Mi"
 
 authHelper:
   image:
@@ -27,21 +27,21 @@ authHelper:
     imagePullPolicy: Always
   resourcesName: up9-auth-helper
 
-  requestCpu: 0
-  requestMemory: 1Mi
-  limitCpu: 0.5
-  limitMemory: 256Mi
+  requestCpu: "1m"
+  requestMemory: "1Mi"
+  limitCpu: "500m"
+  limitMemory: "256Mi"
 
 collector:
   resourcesName: up9-collector
   image:
-    path: gcr.io/up9-docker-hub/collector/feature/tra-1579_improve_images:latest
+    path: gcr.io/up9-docker-hub/collector/master:latest
     imagePullPolicy: Always
 
-  requestCpu: 0.1
-  requestMemory: 50Mi
-  limitCpu: 2
-  limitMemory: 500Mi
+  requestCpu: "100m"
+  requestMemory: "50Mi"
+  limitCpu: "1000m"
+  limitMemory: "500Mi"
 
 sidecarInjector:
   sidecarInjectorImage:
@@ -62,10 +62,10 @@ sidecarInjector:
     path: gcr.io/up9-docker-hub/passive-tapper/feature/tra-1579_improve_images:latest
     imagePullPolicy: Always
 
-  requestCpu: 0.01
-  requestMemory: 1Mi
-  limitCpu: 0.1
-  limitMemory: 10Mi
+  requestCpu: "100m"
+  requestMemory: "1Mi"
+  limitCpu: "500m"
+  limitMemory: "50Mi"
 
 passiveTapper:
   port: 25111
