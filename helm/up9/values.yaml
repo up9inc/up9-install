@@ -40,7 +40,7 @@ collector:
 
   requestCpu: "100m"
   requestMemory: "50Mi"
-  limitCpu: "1000m"
+  limitCpu: "750m"
   limitMemory: "500Mi"
 
 sidecarInjector:

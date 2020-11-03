@@ -6,7 +6,7 @@ metadata:
   name: {{ .Values.collector.resourcesName }}-daemonset
   namespace: {{ .Values.namespace }}
 spec:
-  revisionHistoryLimit: 10
+  # Why do we need selector?
   selector:
     matchLabels:
       app: {{ .Values.collector.resourcesName }}-daemonset
@@ -60,8 +60,8 @@ spec:
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       shareProcessNamespace: false
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 5
   updateStrategy:
     rollingUpdate:
-      maxUnavailable: 1
+      maxUnavailable: 100%
     type: RollingUpdate
