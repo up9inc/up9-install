@@ -11,7 +11,7 @@ up9EnvSuffix: up9.app
 
 agent:
   image:
-    path: gcr.io/up9-docker-hub/trcc-agent/master:latest
+    path: gcr.io/up9-docker-hub/trcc-agent/develop:latest  # TODO: 
     imagePullPolicy: Always
   resourcesName: up9-test-agent
   testRunnerVersion: master:latest
@@ -35,7 +35,7 @@ authHelper:
 collector:
   resourcesName: up9-collector
   image:
-    path: gcr.io/up9-docker-hub/collector/master:latest
+    path: gcr.io/up9-docker-hub/collector/develop:latest  # TODO:
     imagePullPolicy: Always
 
   requestCpu: "100m"
@@ -59,7 +59,7 @@ sidecarInjector:
     imagePullPolicy: Always
 
   up9InjectedPassiveTapperImage:
-    path: gcr.io/up9-docker-hub/passive-tapper/feature/tra-1579_improve_images:latest
+    path: gcr.io/up9-docker-hub/passive-tapper/develop:latest  # TODO:
     imagePullPolicy: Always
 
   requestCpu: "100m"
