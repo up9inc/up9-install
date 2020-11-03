@@ -112,7 +112,7 @@ spec:
             limits:
               cpu: {{ .Values.sidecarInjector.limitCpu }}
               memory: {{ .Values.sidecarInjector.limitMemory }}
-      automountServiceAccountToken: true
+      # automountServiceAccountToken: true redundant if we specify it in the service account
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       volumes:
