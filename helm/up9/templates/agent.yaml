@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.agent.resourcesName }}
-          image: {{ .Values.agent.image.path }}
-          imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
+          image: {{ .Values.up9BaseRepositoryPath }}/trcc-agent/{{ .Values.branch }}:latest
+          imagePullPolicy: Always
           env:
             - name: UP9_ENV_SUFFIX
               value: {{ .Values.up9EnvSuffix }}
@@ -34,7 +34,7 @@ spec:
             - name: AUTH_HELPER_SERVER
               value: {{ .Values.authHelper.resourcesName }}
             - name: TEST_RUNNER_VERSION
-              value: {{ .Values.agent.testRunnerVersion }}
+              value: {{ .Values.branch }}:latest
             - name: K8S_NAMESPACE
               value: {{ .Values.namespace }}
             - name: UP9_DISABLE_LOGS_STDOUT
@@ -56,14 +56,14 @@ spec:
               cpu: {{ .Values.agent.limitCpu }}
               memory: {{ .Values.agent.limitMemory }}
         - name: {{ .Values.authHelper.resourcesName }}
-          image: {{ .Values.authHelper.image.path }}
-          imagePullPolicy: {{ .Values.authHelper.image.imagePullPolicy }}
+          image: {{ .Values.up9BaseRepositoryPath }}/authentication-helper/{{ .Values.branch }}:latest
+          imagePullPolicy: Always
           env:
             - name: "UP9_DISABLE_LOGS_STDOUT"
               value: {{ .Values.logging.disableStdoutLogging | quote }}
           ports:
             - name: app
-              containerPort: 3000
+              containerPort: {{ .Values.authHelper.port }}
           resources:
             requests:
               cpu: {{ .Values.authHelper.requestCpu }}
@@ -72,8 +72,8 @@ spec:
               cpu: {{ .Values.authHelper.limitCpu }}
               memory: {{ .Values.authHelper.limitMemory }}
         - name: "up9-sidecar-injector"
-          image: {{ .Values.sidecarInjector.sidecarInjectorImage.path }}
-          imagePullPolicy: {{ .Values.sidecarInjector.sidecarInjectorImage.imagePullPolicy }}
+          image: {{ .Values.up9BaseRepositoryPath }}/sidecar-injector/{{ .Values.branch }}:latest
+          imagePullPolicy: Always
           command: [ "entrypoint.sh" ]
           args: [ ]
           ports:
@@ -129,8 +129,8 @@ spec:
   type: ClusterIP
   ports:
     - name: app
-      port: 3000
-      targetPort: 3000
+      port: {{ .Values.authHelper.port }}
+      targetPort: {{ .Values.authHelper.port }}
       protocol: TCP
   selector:
     app: {{ .Values.agent.resourcesName }}

@@ -6,15 +6,13 @@ clusterRoleBindingName: up9-cluster-role-binding
 agentName:
 clientId:
 clientSecret:
-up9EnvSuffix: up9.app
 
+up9EnvSuffix: up9.app
+branch: master   # all components will use this branch !
+up9BaseRepositoryPath: gcr.io/up9-docker-hub
 
 agent:
-  image:
-    path: gcr.io/up9-docker-hub/trcc-agent/develop:latest  # TODO:
-    imagePullPolicy: Always
   resourcesName: up9-test-agent
-  testRunnerVersion: master:latest
 
   requestCpu: "100m"
   requestMemory: "100Mi"
@@ -22,10 +20,8 @@ agent:
   limitMemory: "512Mi"
 
 authHelper:
-  image:
-    path: gcr.io/up9-docker-hub/authentication-helper/master:latest
-    imagePullPolicy: Always
   resourcesName: up9-auth-helper
+  port: 3000
 
   requestCpu: "100m"
   requestMemory: "1Mi"
@@ -34,9 +30,6 @@ authHelper:
 
 collector:
   resourcesName: up9-collector
-  image:
-    path: gcr.io/up9-docker-hub/collector/develop:latest  # TODO:
-    imagePullPolicy: Always
 
   requestCpu: "100m"
   requestMemory: "50Mi"
@@ -44,23 +37,7 @@ collector:
   limitMemory: "500Mi"
 
 sidecarInjector:
-  sidecarInjectorImage:
-    path: gcr.io/up9-docker-hub/sidecar-injector:v3
-    imagePullPolicy: Always
-
   annotationNamespace: injector.up9
-
-  up9InjectedEnvoyImage:
-    path: gcr.io/up9-docker-hub/up9-envoy/develop:latest
-    imagePullPolicy: Always
-
-  up9InjectedInitImage:
-    path: gcr.io/up9-docker-hub/up9-inject-init/develop:latest
-    imagePullPolicy: Always
-
-  up9InjectedPassiveTapperImage:
-    path: gcr.io/up9-docker-hub/passive-tapper/develop:latest  # TODO:
-    imagePullPolicy: Always
 
   requestCpu: "100m"
   requestMemory: "1Mi"

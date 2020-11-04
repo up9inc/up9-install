@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.collector.resourcesName }}-daemonset
-          image: {{ .Values.collector.image.path }}
-          imagePullPolicy: {{ .Values.collector.image.imagePullPolicy }}
+          image: gcr.io/up9-docker-hub/collector/{{ .Values.branch }}:latest
+          imagePullPolicy: Always
           env:
             - name: UP9_ENV_SUFFIX
               value: {{ .Values.up9EnvSuffix | quote }}
@@ -51,7 +51,6 @@ spec:
               memory: {{ .Values.collector.limitMemory }}
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
-      # automountServiceAccountToken: true redundant if we specify it in the service account
       terminationGracePeriodSeconds: 5
   updateStrategy:
     rollingUpdate:
