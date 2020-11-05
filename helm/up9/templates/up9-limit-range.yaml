@@ -5,7 +5,11 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   limits:
-    - default:
+    - type: Container
+      default:
         memory: "512Mi"
-        cpu: "200m"
-      type: Container
+        cpu: "500m"
+      defaultRequest:
+        memory: "100Mi"
+        cpu: "100m"
+
