@@ -3,13 +3,17 @@ serviceAccountName: up9-service-account
 clusterRoleName: up9-cluster-role
 clusterRoleBindingName: up9-cluster-role-binding
 
+# the command we show to users always contains this values
 agentName:
 clientId:
 clientSecret:
+up9EnvSuffix:
 
-up9EnvSuffix: up9.app
-branch: master   # all components will use this branch !
+# before publishing this helm chart to develop we need to check what is this value.
 up9BaseRepositoryPath: gcr.io/up9-docker-hub
+imagesBranch: master    # all components will use this branch
+imagesTag: ":latest"      # all components will use this tag
+
 
 agent:
   resourcesName: up9-test-agent

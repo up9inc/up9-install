@@ -15,40 +15,40 @@ spec:
         app: {{ .Values.collector.resourcesName }}-daemonset
     spec:
       containers:
-        - name: {{ .Values.collector.resourcesName }}-daemonset
-          image: gcr.io/up9-docker-hub/collector/{{ .Values.branch }}:latest
-          imagePullPolicy: Always
-          env:
-            - name: UP9_ENV_SUFFIX
-              value: {{ .Values.up9EnvSuffix | quote }}
-            - name: PASSIVE_TAPPER_PORT
-              value: {{ .Values.passiveTapper.port | quote }}
-            - name: ENVOY_ADMIN_PORT
-              value: {{ .Values.envoy.adminTapPort | quote }}
-            - name: CLIENT_ID
-              value: {{ .Values.clientId | quote }}
-            - name: CLIENT_SECRET
-              value: {{ .Values.clientSecret | quote }}
-            - name: AGENT_NAME
-              value: {{ .Values.agentName | quote }}
-            - name: UP9_DISABLE_LOGS_STDOUT
-              value: {{ .Values.logging.disableStdoutLogging | quote }}
-            - name: UP9_DISABLE_LOGS_STDERR
-              value: {{ .Values.logging.disableStderrLogging | quote }}
-            - name: UP9_DISABLE_LOGS_CLOUD
-              value: {{ .Values.logging.disableShipToUP9Logging | quote }}
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-          resources:
-            requests:
-              cpu: {{ .Values.collector.requestCpu }}
-              memory: {{ .Values.collector.requestMemory }}
-            limits:
-              cpu: {{ .Values.collector.limitCpu }}
-              memory: {{ .Values.collector.limitMemory }}
+      - name: {{ .Values.collector.resourcesName }}-daemonset
+        image: {{ .Values.up9BaseRepositoryPath }}/collector/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        env:
+        - name: UP9_ENV_SUFFIX
+          value: {{ .Values.up9EnvSuffix | quote }}
+        - name: PASSIVE_TAPPER_PORT
+          value: {{ .Values.passiveTapper.port | quote }}
+        - name: ENVOY_ADMIN_PORT
+          value: {{ .Values.envoy.adminTapPort | quote }}
+        - name: CLIENT_ID
+          value: {{ .Values.clientId | quote }}
+        - name: CLIENT_SECRET
+          value: {{ .Values.clientSecret | quote }}
+        - name: AGENT_NAME
+          value: {{ .Values.agentName | quote }}
+        - name: UP9_DISABLE_LOGS_STDOUT
+          value: {{ .Values.logging.disableStdoutLogging | quote }}
+        - name: UP9_DISABLE_LOGS_STDERR
+          value: {{ .Values.logging.disableStderrLogging | quote }}
+        - name: UP9_DISABLE_LOGS_CLOUD
+          value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        resources:
+          requests:
+            cpu: {{ .Values.collector.requestCpu }}
+            memory: {{ .Values.collector.requestMemory }}
+          limits:
+            cpu: {{ .Values.collector.limitCpu }}
+            memory: {{ .Values.collector.limitMemory }}
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       terminationGracePeriodSeconds: 5
