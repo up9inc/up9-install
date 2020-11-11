@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Values.clusterRoleName }}
 rules:
-  - apiGroups: [ "", "extensions", "apps" ]
+  - apiGroups: [ "", "extensions", "apps", "metrics.k8s.io"]
     resources: [ "pods", "services", "endpoints", "namespaces",  "ingresses", "configmaps", "deployments" ]
     verbs: [ "list", "get", "watch" ]
   - apiGroups: [ "extensions", "batch" ]
