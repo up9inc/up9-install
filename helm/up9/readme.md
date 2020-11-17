@@ -3,8 +3,8 @@
 This helm chart will install:
  * up9 agent (invokes test runner)
  * up9 auth helper
- * collector + injector (optional - injects sidecars for observing traffic) 
- * Dependencies (service account, cluster role and cluster role binding) in `up9` namespace
+ * collector + injector 
+ * Dependencies (service account, cluster role and cluster role binding)
 
 ## Installation 
 Before running the installation commands, please make sure `kubectl` command is configured to control desired Kubernetes cluster
@@ -20,8 +20,8 @@ Update `values.yaml`
 
 `agentName` - choose a name with which the agent registers itself
 
-#### Optional
-`sidecarInjectionEnabled` - Whether to enable sidecar injection
+`defaultWorkspace` - choose default workspace to send data to 
+
 
 ### Run helm installation - using HELM v2
 To install the chart in default namespace (the "up9" parameter is the folder name containing this helm chart)

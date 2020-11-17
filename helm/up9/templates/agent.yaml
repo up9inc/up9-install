@@ -1,11 +1,11 @@
-{{ if .Values.agent.enabled }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: {{ .Values.agent.resourcesName }}
   name: {{ .Values.agent.resourcesName }}
-  namespace: {{ .Values.namespace  }}
+  namespace: {{ .Values.namespace }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -19,7 +19,10 @@ spec:
       namespace: {{ .Values.namespace }}
     spec:
       containers:
-      - env:
+      - name: {{ .Values.agent.resourcesName }}
+        image: {{ .Values.up9BaseRepositoryPath }}/trcc-agent/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        env:
         - name: UP9_ENV_SUFFIX
           value: {{ .Values.up9EnvSuffix }}
         - name: AGENT_NAME
@@ -30,20 +33,123 @@ spec:
           value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
         - name: AUTH_HELPER_SERVER
           value: {{ .Values.authHelper.resourcesName }}
-        - name: TEST_RUNNER_VERSION
-          value: {{ .Values.agent.testRunnerVersion }}
         - name: K8S_NAMESPACE
           value: {{ .Values.namespace }}
+        - name: TEST_RUNNER_VERSION
+          value: {{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         - name: UP9_DISABLE_LOGS_STDOUT
           value: {{ .Values.logging.disableStdoutLogging | quote }}
         - name: UP9_DISABLE_LOGS_STDERR
           value: {{ .Values.logging.disableStderrLogging | quote }}
         - name: UP9_DISABLE_LOGS_CLOUD
           value: {{ .Values.logging.disableShipToUP9Logging | quote }}
-        image: {{ .Values.agent.image.path }}
-        imagePullPolicy: {{ .Values.agent.image.imagePullPolicy }}
-        name: {{ .Values.agent.resourcesName }}
-      automountServiceAccountToken: true
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        resources:
+          requests:
+            cpu: {{ .Values.agent.requestCpu }}
+            memory: {{ .Values.agent.requestMemory }}
+          limits:
+            cpu: {{ .Values.agent.limitCpu }}
+            memory: {{ .Values.agent.limitMemory }}
+      - name: {{ .Values.authHelper.resourcesName }}
+        image: {{ .Values.up9BaseRepositoryPath }}/authentication-helper/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        env:
+          - name: "UP9_DISABLE_LOGS_STDOUT"
+            value: {{ .Values.logging.disableStdoutLogging | quote }}
+        ports:
+          - name: app
+            containerPort: {{ .Values.authHelper.port }}
+        resources:
+          requests:
+            cpu: {{ .Values.authHelper.requestCpu }}
+            memory: {{ .Values.authHelper.requestMemory }}
+          limits:
+            cpu: {{ .Values.authHelper.limitCpu }}
+            memory: {{ .Values.authHelper.limitMemory }}
+      - name: "up9-sidecar-injector"
+        image: {{ .Values.up9BaseRepositoryPath }}/sidecar-injector/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        command: [ "entrypoint.sh" ]
+        args: [ ]
+        ports:
+          - name: https
+            containerPort: 9443
+          - name: http-metrics
+            containerPort: 9000
+        volumeMounts:
+          - name: secrets
+            mountPath: /var/lib/secrets
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /health
+            port: https
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+        env:
+          - name: "TLS_CERT_FILE"
+            value: "/var/lib/secrets/sidecar-injector.crt"
+          - name: "TLS_KEY_FILE"
+            value: "/var/lib/secrets/sidecar-injector.key"
+          - name: "LOG_LEVEL"
+            value: "2"
+          - name: "CONFIG_DIR"
+            value: "conf/"
+          - name: "CONFIGMAP_LABELS"
+            value: "app=up9-sidecar-injector"
+          - name: "ANNOTATION_NAMESPACE"
+            value: {{ .Values.sidecarInjector.annotationNamespace }}
+        resources:
+          requests:
+            cpu: {{ .Values.sidecarInjector.requestCpu }}
+            memory: {{ .Values.sidecarInjector.requestMemory }}
+          limits:
+            cpu: {{ .Values.sidecarInjector.limitCpu }}
+            memory: {{ .Values.sidecarInjector.limitMemory }}
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
-{{ end }}
+      volumes:
+        - name: secrets
+          secret:
+            secretName: up9-sidecar-injector
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authHelper.resourcesName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: app
+      port: {{ .Values.authHelper.port }}
+      targetPort: {{ .Values.authHelper.port }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.agent.resourcesName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: up9-sidecar-injector-prod
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      protocol: TCP
+    - name: http-metrics
+      port: 80
+      targetPort: http-metrics
+      protocol: TCP
+  selector:
+    app: {{ .Values.agent.resourcesName }}
+---
