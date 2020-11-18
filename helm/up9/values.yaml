@@ -49,6 +49,10 @@ sidecarInjector:
   limitCpu: "500m"
   limitMemory: "50Mi"
 
+  allServices: false
+  includedNamespaces: []
+  excludedNamespace: []
+
 passiveTapper:
   port: 25111
 
