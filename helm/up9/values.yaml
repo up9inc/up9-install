@@ -8,7 +8,7 @@ agentName:
 clientId:
 clientSecret:
 up9EnvSuffix:
-defaultWorkspace:
+workspace:
 
 # before publishing this helm chart to develop we need to check what is this value.
 up9BaseRepositoryPath: gcr.io/up9-docker-hub
