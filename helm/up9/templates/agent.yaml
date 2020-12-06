@@ -23,16 +23,25 @@ spec:
         image: {{ .Values.up9BaseRepositoryPath }}/trcc-agent/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         imagePullPolicy: Always
         env:
+        {{- if .Values.standalone }}
+        - name: UP9_SITTER_AUTHORITY
+          value: "{{ .Values.sitter.resourcesName }}:{{ .Values.sitter.port }}"
+        - name: UP9_ENV_SUFFIX
+          value: ""
+        - name: AUTH_HELPER_SERVER
+          value: ""
+        {{- else }}
         - name: UP9_ENV_SUFFIX
           value: {{ .Values.up9EnvSuffix }}
+        - name: AUTH_HELPER_SERVER
+          value: {{ .Values.authHelper.resourcesName }}
+        {{- end }}
         - name: AGENT_NAME
           value: {{ required ".Values.agentName parameter is Required" .Values.agentName }}
         - name: CLIENT_ID
           value: {{ required ".Values.clientId parameter is Required" .Values.clientId }}
         - name: CLIENT_SECRET
           value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
-        - name: AUTH_HELPER_SERVER
-          value: {{ .Values.authHelper.resourcesName }}
         - name: K8S_NAMESPACE
           value: {{ .Values.namespace }}
         - name: TEST_RUNNER_VERSION
@@ -57,6 +66,7 @@ spec:
           limits:
             cpu: {{ .Values.agent.limitCpu }}
             memory: {{ .Values.agent.limitMemory }}
+      {{- if not .Values.standalone }}
       - name: {{ .Values.authHelper.resourcesName }}
         image: {{ .Values.up9BaseRepositoryPath }}/authentication-helper/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         imagePullPolicy: Always
@@ -73,6 +83,7 @@ spec:
           limits:
             cpu: {{ .Values.authHelper.limitCpu }}
             memory: {{ .Values.authHelper.limitMemory }}
+      {{- end }}
       - name: "up9-sidecar-injector"
         image: {{ .Values.up9BaseRepositoryPath }}/sidecar-injector/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         imagePullPolicy: Always

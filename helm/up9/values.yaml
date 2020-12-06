@@ -14,6 +14,7 @@ workspace:
 up9BaseRepositoryPath: gcr.io/up9-docker-hub
 imagesBranch: master    # all components will use this branch
 imagesTag: ":latest"      # all components will use this tag
+standalone: false
 
 
 agent:
@@ -52,6 +53,15 @@ sidecarInjector:
   allServices: false
   includedNamespaces: []
   excludedNamespace: []
+
+sitter:
+  resourcesName: up9-sitter
+  port: 7000
+
+  requestCpu: "100m"
+  requestMemory: "1Mi"
+  limitCpu: "500m"
+  limitMemory: "256Mi"
 
 passiveTapper:
   port: 25111

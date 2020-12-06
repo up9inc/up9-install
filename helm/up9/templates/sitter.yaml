@@ -1,0 +1,51 @@
+{{- if .Values.standalone }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.sitter.resourcesName }}
+  name: {{ .Values.sitter.resourcesName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.sitter.resourcesName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.sitter.resourcesName }}
+      namespace: {{ .Values.namespace }}
+    spec:
+      containers:
+      - name: {{ .Values.sitter.resourcesName }}
+        image: {{ .Values.up9BaseRepositoryPath }}/sitter/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{ .Values.sitter.requestCpu }}
+            memory: {{ .Values.sitter.requestMemory }}
+          limits:
+            cpu: {{ .Values.sitter.limitCpu }}
+            memory: {{ .Values.sitter.limitMemory }}
+      serviceAccount: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.sitter.resourcesName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: app
+      port: {{ .Values.sitter.port }}
+      targetPort: {{ .Values.sitter.port }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.sitter.resourcesName }}
+---
+{{- end }}
