@@ -66,7 +66,18 @@ spec:
           limits:
             cpu: {{ .Values.agent.limitCpu }}
             memory: {{ .Values.agent.limitMemory }}
-      {{- if not .Values.standalone }}
+      {{- if .Values.standalone }}
+      - name: {{ .Values.sitter.resourcesName }}
+        image: {{ .Values.up9BaseRepositoryPath }}/sitter/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{ .Values.sitter.requestCpu }}
+            memory: {{ .Values.sitter.requestMemory }}
+          limits:
+            cpu: {{ .Values.sitter.limitCpu }}
+            memory: {{ .Values.sitter.limitMemory }}
+      {{- else }}
       - name: {{ .Values.authHelper.resourcesName }}
         image: {{ .Values.up9BaseRepositoryPath }}/authentication-helper/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         imagePullPolicy: Always
@@ -132,6 +143,23 @@ spec:
           secret:
             secretName: up9-sidecar-injector
 ---
+{{- if .Values.standalone }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.sitter.resourcesName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: app
+      port: {{ .Values.sitter.port }}
+      targetPort: {{ .Values.sitter.port }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.agent.resourcesName }}
+---
+{{- else }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -147,6 +175,7 @@ spec:
   selector:
     app: {{ .Values.agent.resourcesName }}
 ---
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
