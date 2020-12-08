@@ -30,8 +30,6 @@ spec:
           limits:
             cpu: {{ .Values.sitter.limitCpu }}
             memory: {{ .Values.sitter.limitMemory }}
-      serviceAccount: {{ .Values.serviceAccountName }}
-      serviceAccountName: {{ .Values.serviceAccountName }}
 ---
 apiVersion: v1
 kind: Service
