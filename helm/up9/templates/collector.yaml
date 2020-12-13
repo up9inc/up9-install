@@ -19,8 +19,13 @@ spec:
         image: {{ .Values.up9BaseRepositoryPath }}/collector/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         imagePullPolicy: Always
         env:
+        {{- if .Values.standalone }}
+        - name: UP9_SITTER_AUTHORITY
+          value: "{{ .Values.sitter.resourcesName }}:{{ .Values.sitter.port }}"
+        {{- else }}
         - name: UP9_ENV_SUFFIX
           value: {{ .Values.up9EnvSuffix | quote }}
+        {{- end }}
         - name: PASSIVE_TAPPER_PORT
           value: {{ .Values.passiveTapper.port | quote }}
         - name: ENVOY_ADMIN_PORT
@@ -32,7 +37,7 @@ spec:
         - name: AGENT_NAME
           value: {{ .Values.agentName | quote }}
         - name: DEFAULT_WORKSPACE
-          value: {{ .Values.defaultWorkspace | quote }}
+          value: {{ .Values.workspace | quote }}
         - name: UP9_DISABLE_LOGS_STDOUT
           value: {{ .Values.logging.disableStdoutLogging | quote }}
         - name: UP9_DISABLE_LOGS_STDERR
