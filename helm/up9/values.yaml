@@ -7,7 +7,7 @@ clusterRoleBindingName: up9-cluster-role-binding
 agentName:
 clientId:
 clientSecret:
-up9EnvSuffix:
+up9EnvSuffix: up9.app  # default to PROD (the command from GUi will add it anyway - but this will support "old" docs command.
 workspace:
 
 # before publishing this helm chart to develop we need to check what is this value.
