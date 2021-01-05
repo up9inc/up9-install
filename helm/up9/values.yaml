@@ -50,6 +50,7 @@ sidecarInjector:
   limitCpu: "500m"
   limitMemory: "50Mi"
 
+  injectLabel: true
   allServices: false
   includedNamespaces: []
   excludedNamespace: []
