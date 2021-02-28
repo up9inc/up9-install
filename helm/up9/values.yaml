@@ -58,8 +58,8 @@ sidecarInjector:
 tapper:
   requestCpu: "100m"
   requestMemory: "1Mi"
-  limitCpu: "1000m"
-  limitMemory: "1000Mi"
+  limitCpu: "250m"
+  limitMemory: "750Mi"
 
 sitter:
   resourcesName: up9-sitter
