@@ -55,6 +55,12 @@ sidecarInjector:
   includedNamespaces: []
   excludedNamespace: []
 
+tapper:
+  requestCpu: "100m"
+  requestMemory: "1Mi"
+  limitCpu: "250m"
+  limitMemory: "750Mi"
+
 sitter:
   resourcesName: up9-sitter
   port: 7000
