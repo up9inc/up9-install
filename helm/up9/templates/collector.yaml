@@ -83,12 +83,12 @@ spec:
               - NET_ADMIN
           privileged: true
           runAsUser: 0
-        hostNetwork: true
-        dnsPolicy: ClusterFirstWithHostNet
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       terminationGracePeriodSeconds: 5
   updateStrategy:
     rollingUpdate:
