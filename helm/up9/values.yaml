@@ -42,18 +42,6 @@ collector:
   limitCpu: "750m"
   limitMemory: "500Mi"
 
-sidecarInjector:
-  annotationNamespace: injector.up9
-
-  requestCpu: "100m"
-  requestMemory: "1Mi"
-  limitCpu: "500m"
-  limitMemory: "50Mi"
-
-  injectLabel: true
-  allServices: false
-  includedNamespaces: []
-  excludedNamespace: []
 
 tapper:
   requestCpu: "100m"
@@ -72,6 +60,7 @@ sitter:
 
 passiveTapper:
   port: 25111
+  limitMemoryKB: "500000"
 
 envoy:
   adminTapPort: 21213

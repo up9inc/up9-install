@@ -49,6 +49,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
+        - name: HOST_TAPPER
+          value: "1"
         resources:
           requests:
             cpu: {{ .Values.collector.requestCpu }}
@@ -56,8 +58,37 @@ spec:
           limits:
             cpu: {{ .Values.collector.limitCpu }}
             memory: {{ .Values.collector.limitMemory }}
+      - env:
+          - name: WEB_SOCKET_PORT
+            value: {{ .Values.passiveTapper.port | quote }}
+          - name: MAX_MEMORY_KB
+            value: {{ .Values.passiveTapper.limitMemoryKB | quote }}
+          - name: NETINTERFACE
+            value: any
+          - name: HOST_MODE
+            value: "1"
+        image: {{ .Values.up9BaseRepositoryPath }}/passive-tapper/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        imagePullPolicy: Always
+        name: up9-passive-tapper
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 1Mi
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       terminationGracePeriodSeconds: 5
   updateStrategy:
     rollingUpdate:
