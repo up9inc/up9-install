@@ -4,12 +4,14 @@
  Run without parameters to see the usage.
 
 ### Example:
-   `generate_k8s_setup.sh -i xxx-xxx -s yyy-yyy -a zzz`
+   `setup.sh -i xxx-xxx -s yyy-yyy -a zzz`
 
  where
+ 
 * xxx-xxx is the Client Id retrieved from UP9 CLI or GUI
 * yyy-yyy is the Client Secret retrieved from UP9 CLI or GUI
 * zzz is (optional) agent name
+
 
 ---
 
