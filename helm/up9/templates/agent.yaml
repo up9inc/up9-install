@@ -59,6 +59,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
+        - name: HOST_MODE
+          value: "1"
         resources:
           requests:
             cpu: {{ .Values.agent.requestCpu }}
@@ -131,22 +133,4 @@ spec:
     app: {{ .Values.agent.resourcesName }}
 ---
 {{- end }}
-apiVersion: v1
-kind: Service
-metadata:
-  name: up9-sidecar-injector-prod
-  namespace: {{ .Values.namespace }}
-spec:
-  type: ClusterIP
-  ports:
-    - name: https
-      port: 443
-      targetPort: https
-      protocol: TCP
-    - name: http-metrics
-      port: 80
-      targetPort: http-metrics
-      protocol: TCP
-  selector:
-    app: {{ .Values.agent.resourcesName }}
 ---
