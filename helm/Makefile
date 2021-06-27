@@ -36,12 +36,16 @@ build:  test ## build Helm repo artifacts
 publish:  publish-develop ## publish Helm chart - copy to public bucket
 
 publish-develop:	build 	## publish Helm chart to DEVELOP repo - https://static.up9.com/helm-develop
-	@cd build && gsutil cp -c -L $(CPLOG) -r . $(BUCKET_DEVELOP) ; \
+	@cd build && \
+		gsutil cp -c -L $(CPLOG) -r . $(BUCKET_DEVELOP) && \
+		gsutil setmeta -r -h "Cache-Control:public, max-age=30" $(BUCKET_DEVELOP) ; \
 		echo -e "\nSee operation log in ${C_Y} ${CPLOG} ${C_N}"
 
 
 publish-master:		build 	## publish Helm chart to MASTER repo - https://static.up9.com/helm
-	@cd build && gsutil cp -c -L /tmp/cp.$$.log -r . $(BUCKET_MASTER) 	
+	@cd build && \
+		gsutil cp -c -L /tmp/cp.$$.log -r . $(BUCKET_MASTER) && \
+		gsutil setmeta -r -h "Cache-Control:public, max-age=30" $(BUCKET_MASTER)
 
 test: ## test bucket connection and tooling
 	@echo -e "Verifying connection and tooling\n"
