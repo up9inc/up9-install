@@ -61,6 +61,8 @@ spec:
               fieldPath: spec.nodeName
         - name: HOST_MODE
           value: "1"
+        - name: GCR_IMAGE_PATH
+          value: {{ .Values.up9BaseRepositoryPath }}/trcc-agent/{{ .Values.imagesBranch }}
         resources:
           requests:
             cpu: {{ .Values.agent.requestCpu }}
