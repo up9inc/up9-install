@@ -51,6 +51,8 @@ spec:
               fieldPath: spec.nodeName
         - name: HOST_TAPPER
           value: "1"
+        - name: GCR_IMAGE_PATH
+          value: {{ .Values.up9BaseRepositoryPath }}/collector/{{ .Values.imagesBranch }}
         resources:
           requests:
             cpu: {{ .Values.collector.requestCpu }}
