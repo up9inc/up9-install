@@ -101,6 +101,9 @@ spec:
       {{- end }}
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
 ---
 {{- if .Values.standalone }}
 apiVersion: v1
