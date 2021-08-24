@@ -15,7 +15,7 @@ up9BaseRepositoryPath: gcr.io/up9-docker-hub
 imagesBranch: master    # all components will use this branch
 imagesTag: ":latest"      # all components will use this tag
 standalone: false
-priorityClassName:
+priorityClassName:    # priority class for all UP9 pods (optional, use global default if not specified here)
 
 
 agent:
