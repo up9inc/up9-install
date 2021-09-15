@@ -12,6 +12,9 @@ rules:
   - apiGroups: [ "", "extensions" ]
     resources: [ "pods" ]
     verbs: [ "deletecollection" ]
+  - apiGroups: [ "apps" ]
+    resources: [ "daemonsets" ]
+    verbs: [ "patch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
