@@ -1,7 +1,12 @@
 namespace: up9  # Currently injector works only if it is up9 TODO: TRA-738 (to support namespace other than 'up9')
+
 serviceAccountName: up9-service-account
+
 clusterRoleName: up9-cluster-role
 clusterRoleBindingName: up9-cluster-role-binding
+
+roleName: up9-role
+roleBindingName: up9-role-binding
 
 # the command we show to users always contains this values
 agentName:
