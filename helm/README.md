@@ -5,7 +5,7 @@ This helm chart will install:
  * up9-auth-helper
  * up9-collector (controls traffic tappers / observers)
  * up9-injector (k8s admission controller - injects sidecars for observing application traffic) 
- * Dependencies (service account, cluster role and cluster role binding) in `up9` namespace
+ * Dependencies (service account, role, role binding, cluster role and cluster role binding) in `up9` namespace
 
 # Installation 
 Before running the installation commands, please make sure `kubectl` command is configured to control desired Kubernetes cluster
