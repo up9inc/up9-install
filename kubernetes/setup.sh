@@ -5,7 +5,7 @@
 # Use this script to generate UP9 setup for "vanilla" Kubernetes
 #
 # Example:
-#   generate_k8s_yaml.sh -i xxx-xxx -s yyy-yyy -a zzz
+#   setup.sh -i xxx-xxx -s yyy-yyy -a zzz
 #
 # where 
 #   xxx-xxx is the Client Id retrieved from UP9 CLI or GUI
@@ -20,7 +20,7 @@ SCRIPT_NAME=$0
 AGENT_NAME=up9-$$
 CLIENT_ID=""
 CLIENT_SECRET=""
-DEFAULT_MODEL="default"
+DEFAULT_MODEL=""
 OUTPUT_FILE=up9.$$.yaml
 STATIC_BASE="https://static.up9.com/k8s"
 TEMPLATE_FILE="up9.K8S.TEMPLATE.yaml"

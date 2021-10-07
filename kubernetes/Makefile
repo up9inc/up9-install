@@ -16,7 +16,7 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 # Variables and lists
-BUCKET_PATH="static.up9.io/k8s-dev"
+BUCKET_PATH="static.up9.io/k8s"
 HELM_REPO="https://static.up9.com/helm"
 OUTPUT_FILE="up9.K8S.TEMPLATE.yaml"
 SUFFIX="$(shell date '+%s')"
@@ -37,7 +37,8 @@ build: ## Build k8s template file from HELM chart
 	helm template --repo ${HELM_REPO} up9agent up9 \
 		--set clientId=__TMPL_CLIENT_ID__ \
 		--set clientSecret=__TMPL_CLIENT_SECRET__ \
-		--set agentName=__TMPL_AGENT_NAME__ > ${OUTPUT_FILE}
+		--set agentName=__TMPL_AGENT_NAME__ \
+		--set workspace=__TMPL_AGENT_NAME__ > ${OUTPUT_FILE}
 
 
 clean: ## Clean build artifacts
