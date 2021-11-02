@@ -8,7 +8,7 @@ rules:
     verbs: [ "list", "get", "watch" ]
   - apiGroups: [ "extensions", "batch" ]
     resources: [ "jobs" ]
-    verbs: [ "get", "list", "watch", "create", "delete", "deletecollection", "patch" ]
+    verbs: [ "get", "list", "watch", "patch" ]
   - apiGroups: [ "", "extensions" ]
     resources: [ "pods" ]
     verbs: [ "deletecollection" ]

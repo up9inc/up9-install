@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: {{ .Values.namespaceRoleName }}
+rules:
+  - apiGroups: [ "extensions", "batch" ]
+    resources: [ "jobs" ]
+    verbs: [ "create", "delete", "deletecollection" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: {{ .Values.namespaceRoleBindingName }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Values.namespaceRoleName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccountName }}
+    namespace: {{ .Values.namespace  }}
+---

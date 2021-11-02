@@ -5,6 +5,9 @@ serviceAccountName: up9-service-account
 clusterRoleName: up9-cluster-role
 clusterRoleBindingName: up9-cluster-role-binding
 
+namespaceRoleName: up9-namespace-role
+namespaceRoleBindingName: up9-namespace-role-binding
+
 roleName: up9-role
 roleBindingName: up9-role-binding
 
