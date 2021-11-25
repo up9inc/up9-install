@@ -5,7 +5,7 @@ metadata:
   labels:
     app: {{ .Values.agent.resourcesName }}
   name: {{ .Values.agent.resourcesName }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.agent.resourcesName }}
-      namespace: {{ .Values.namespace }}
+      namespace: {{ .Release.Namespace }}
     spec:
       containers:
       - name: {{ .Values.agent.resourcesName }}
@@ -43,7 +43,7 @@ spec:
         - name: CLIENT_SECRET
           value: {{ required ".Values.clientSecret parameter is Required" .Values.clientSecret }}
         - name: K8S_NAMESPACE
-          value: {{ .Values.namespace }}
+          value: {{ .Release.Namespace }}
         - name: TEST_RUNNER_VERSION
           value: {{ .Values.imagesBranch }}{{ .Values.imagesTag }}
         - name: UP9_DISABLE_LOGS_STDOUT
@@ -110,7 +110,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.sitter.resourcesName }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
@@ -126,7 +126,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.authHelper.resourcesName }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
