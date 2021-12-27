@@ -45,6 +45,7 @@ collector:
   requestMemory: "50Mi"
   limitCpu: "750m"
   limitMemory: "500Mi"
+  mizuListenerPort: 8765
 
 
 tapper:
@@ -62,15 +63,15 @@ sitter:
   limitCpu: "500m"
   limitMemory: "256Mi"
 
-passiveTapper:
-  port: 25111
-  limitMemoryKB: "500000"
-
 envoy:
   adminTapPort: 21213
   proxyListenPortRangeBegin: 21214
   egressPort: 21212
   envoyUserId: 1337
+
+mizu:
+  imageBranch: develop
+  imageTag: ":0.21.7"
 
 logging:
   disableStdoutLogging: 0
