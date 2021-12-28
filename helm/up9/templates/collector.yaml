@@ -89,8 +89,6 @@ spec:
               - DAC_OVERRIDE
             drop:
               - ALL
-          privileged: true
-          runAsUser: 0
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
