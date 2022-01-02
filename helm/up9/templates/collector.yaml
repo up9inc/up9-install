@@ -26,12 +26,12 @@ spec:
         - name: UP9_ENV_SUFFIX
           value: {{ .Values.up9EnvSuffix | quote }}
         {{- end }}
-        - name: PASSIVE_TAPPER_PORT
-          value: {{ .Values.passiveTapper.port | quote }}
         - name: ENVOY_ADMIN_PORT
           value: {{ .Values.envoy.adminTapPort | quote }}
         - name: CLIENT_ID
           value: {{ .Values.clientId | quote }}
+        - name: MIZU_LISTEN_PORT
+          value: {{ .Values.collector.mizuListenerPort | quote }}
         - name: CLIENT_SECRET
           value: {{ .Values.clientSecret | quote }}
         - name: AGENT_NAME
@@ -44,6 +44,8 @@ spec:
           value: {{ .Values.logging.disableStderrLogging | quote }}
         - name: UP9_DISABLE_LOGS_CLOUD
           value: {{ .Values.logging.disableShipToUP9Logging | quote }}
+        - name: TAPPER_TYPE
+          value: mizu
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -61,37 +63,59 @@ spec:
             cpu: {{ .Values.collector.limitCpu }}
             memory: {{ .Values.collector.limitMemory }}
       - env:
-          - name: WEB_SOCKET_PORT
-            value: {{ .Values.passiveTapper.port | quote }}
-          - name: MAX_MEMORY_KB
-            value: {{ .Values.passiveTapper.limitMemoryKB | quote }}
-          - name: NETINTERFACE
-            value: any
+          - name: SENSITIVE_DATA_FILTERING_OPTIONS
+            value: '{"IgnoredUserAgents":[],"PlainTextMaskingRegexes":null,"DisableRedaction":true}'
+          - name: GOGC
+            value: "12800"
           - name: HOST_MODE
             value: "1"
-        image: {{ .Values.up9BaseRepositoryPath }}/passive-tapper/{{ .Values.imagesBranch }}{{ .Values.imagesTag }}
+        image: {{ .Values.up9BaseRepositoryPath }}/mizu/{{ .Values.mizu.imageBranch }}{{ .Values.mizu.imageTag }}
         imagePullPolicy: Always
-        name: up9-passive-tapper
+        name: up9-mizu-tapper
         resources:
           limits:
-            cpu: 500m
-            memory: 1024Mi
+            cpu: 750m
+            memory: 1Gi
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 1Mi
         securityContext:
           capabilities:
             add:
+              - NET_RAW
               - NET_ADMIN
-          privileged: true
-          runAsUser: 0
+              - SYS_ADMIN
+              - SYS_PTRACE
+              - DAC_OVERRIDE
+            drop:
+              - ALL
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /hostproc
+          name: proc
+          readOnly: true
+        command:
+        - ./mizuagent
+        - -i
+        - any
+        - --tap
+        - --api-server-address
+        - ws://localhost:{{ .Values.collector.mizuListenerPort }}/wsTapper
+        - --nodefrag
+        - --procfs
+        - /hostproc
+        - --istio
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       terminationGracePeriodSeconds: 5
+      volumes:
+      - hostPath:
+          path: /proc
+          type: ""
+        name: proc
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
