@@ -70,7 +70,7 @@ envoy:
   envoyUserId: 1337
 
 mizu:
-  imageBranch: master
+  imageBranch: main
   imageTag: ":0.22.0"
 
 logging:
