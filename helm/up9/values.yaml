@@ -70,8 +70,8 @@ envoy:
   envoyUserId: 1337
 
 mizu:
-  imageBranch: develop
-  imageTag: ":0.21.7"
+  imageBranch: main
+  imageTag: ":0.22.0"
 
 logging:
   disableStdoutLogging: 0
