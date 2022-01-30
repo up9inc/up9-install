@@ -105,7 +105,7 @@ spec:
         - --nodefrag
         - --procfs
         - /hostproc
-        - --istio
+        - --servicemesh
       serviceAccount: {{ .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       hostNetwork: true
