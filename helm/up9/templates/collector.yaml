@@ -73,12 +73,12 @@ spec:
         imagePullPolicy: Always
         name: up9-mizu-tapper
         resources:
-          limits:
-            cpu: 750m
-            memory: 1Gi
           requests:
-            cpu: 50m
-            memory: 1Mi
+            cpu: {{ .Values.tapper.requestCpu }}
+            memory: {{ .Values.tapper.requestMemory }}
+          limits:
+            cpu: {{ .Values.tapper.limitCpu }}
+            memory: {{ .Values.tapper.limitMemory }}
         securityContext:
           capabilities:
             add:
