@@ -51,8 +51,8 @@ collector:
 tapper:
   requestCpu: "100m"
   requestMemory: "1Mi"
-  limitCpu: "250m"
-  limitMemory: "750Mi"
+  limitCpu: "750m"
+  limitMemory: "1Gi"
 
 sitter:
   resourcesName: up9-sitter
